@@ -222,19 +222,11 @@ var capitalizeFirstLetter = (string) => {
 }
 
 var generator = {
-  name: (callback) => {
-    process.nextTick(() => {
-      getName(callback)
+  generateName: (callback) => {
+    getName((data) => {
+      callback(data)
     })
-  },
-  getName: () => {
-    var newName
-    getName((name) => {
-      newName = name
-    })
-    process.nextTick(() => {})
-    return newName
   }
 }
 
-module.exports = generator
+export default generator

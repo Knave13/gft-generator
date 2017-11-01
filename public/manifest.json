@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "GFT Generator",
+  "name": "GFT Generator - Firebase App",
   "icons": [
     {
       "src": "favicon.ico",
