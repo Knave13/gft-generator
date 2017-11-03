@@ -77,20 +77,11 @@ class App extends Component {
         <p>
           Galaxies: {this.state.count}
         </p>
-        <Galaxies 
-          addStarSystem={this.addStarSystem.bind(this)}
-          addAstronomicalDatra={this.addAstronomicalData.bind(this)} />
+        <Galaxies database={db}/>
       </div>
-    );
+    )
   }
 
-  addStarSystem() {
-    alert('add starsystem')
-  }
-
-  addAstronomicalData() {
-
-  }
 }
 
 export default App;

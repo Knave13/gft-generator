@@ -25,7 +25,7 @@ function loadData(db, callback)
     var astro = db.collection('astronomics')
     astro.get().then((data) => {
         console.log('Astronomics :', data.size)
-        if (data.size == 480) {
+        if (data.size === 480) {
             callback(false)
         } else {    
             astro.doc('A0D').set({ sizeCode: 'D', typeCode: 'A', classification: 0, magnitude: 10.50, luminosity: 0.005, temperature: 14000, radii: 0.017, mass: 0.36, zones: 'OOOOOOOOOOOOOOOOOOOO' })

@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import firebase from 'firebase'
 import 'firebase/firestore'
 import NameGen from '../classes/generate-name'
+import StarGen from '../classes/generate-starsystem'
+import Astronomics from '../data/astronomics'
 
 export default class Galaxies extends Component {
     constructor(props) {
@@ -31,9 +33,10 @@ export default class Galaxies extends Component {
             <div className='container' style={divStyle}>
                 <h1>Welcome to the GFT Galaxy Generator</h1>
                 <br/>
-                <label id='test'>{this.state.dataSize}</label>
+                <label>Galaxy Count {this.state.dataSize}</label>
+                <br/>
                 <button onClick={this.addGalaxy}>Add Galaxy</button>
-                <button onClick={this.props.addStarSystem}>Add Star System</button>
+                <button onClick={this.addStarSystem.bind(this)}>Add Star System</button>
                 <button onClick={this.props.addAstronomicalData}>Add Data</button>
             </div>
         )
@@ -45,10 +48,20 @@ export default class Galaxies extends Component {
                 name: name,
                 activeIndicator: true,
                 starCount: 0
-            }).then((data) => {
-                console.log(JSON.stringify(data, null, 2))
             })
-        })
-        
+        })    
     }
+
+    addStarSystem() {
+        NameGen.generateName((name) => {
+            var star = StarGen.generateStarSystem(5, name)
+            Astronomics.findByKey(this.props.database, star.primaryStarKeyCode, (data) => {
+                console.log('Astronomics', JSON.stringify(data, null, 2))
+                star.astronomics = data
+                console.log(JSON.stringify(star, null, 2))
+             })
+            
+            //alert('add starsystem')
+        })
+      }
 }
