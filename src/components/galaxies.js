@@ -4,12 +4,14 @@ import 'firebase/firestore'
 import NameGen from '../classes/generate-name'
 import StarGen from '../classes/generate-starsystem'
 import Astronomics from '../data/astronomics'
+import StarSystem from './starSystem'
 
 export default class Galaxies extends Component {
     constructor(props) {
         super(props)
         this.state = { 
-            dataSize: -1
+            dataSize: -1,
+            starSystem: null
         }
     }
 
@@ -38,6 +40,8 @@ export default class Galaxies extends Component {
                 <button onClick={this.addGalaxy}>Add Galaxy</button>
                 <button onClick={this.addStarSystem.bind(this)}>Add Star System</button>
                 <button onClick={this.props.addAstronomicalData}>Add Data</button>
+                <br/>
+                <StarSystem starSystem={this.state.starSystem} />
             </div>
         )
     }
@@ -59,6 +63,7 @@ export default class Galaxies extends Component {
                 console.log('Astronomics', JSON.stringify(data, null, 2))
                 star.astronomics = data
                 console.log(JSON.stringify(star, null, 2))
+                this.setState({starSystem: star})
              })
             
             //alert('add starsystem')
