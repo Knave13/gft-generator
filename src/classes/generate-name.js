@@ -195,7 +195,6 @@ var getNameSegment = (callback) => {
 
 var getName = (callback) => {
   var valid = false
-  var name = ""
   while (!valid) {
     getNameSegment((name) => {
       name = capitalizeFirstLetter(name)

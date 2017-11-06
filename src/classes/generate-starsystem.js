@@ -1,4 +1,5 @@
 var StellarData  = require('../data/stellarData')
+var GenConfig = require('./generator-config')
 var Random = require('random-js')
 //var gen = require('./generate-name')
 var r = new Random()
@@ -11,11 +12,8 @@ var generator = {
     var starData = getStarType(null)
     var hasNearCompanion = false
     var coords = {x:0,y:0,z:0}
-    //var generatorDetails = new Schema({ any: Schema.Types.Mixed })
     var generatorDetails = {}
     
-    //console.log('Star System generation started', galaxyId, JSON.stringify(coords, null, 2))
-
     starSystem.galaxyId = galaxyId
     starSystem.name = name
     starSystem.coords = coords
@@ -151,11 +149,11 @@ function getCompanionOrbit(orbitsDM, hasNearCompanion) {
 function validateStar(star) {
   // if the star is size IV and K5 to M9 then made the star size V
   if (star.starSize === StellarData.starSize.IV &&
-    ((star.starType == StellarData.starType.K && star.classification >= 5) || star.starType == StellarData.starType.M)) {
+    ((star.starType === StellarData.starType.K && star.classification >= 5) || star.starType === StellarData.starType.M)) {
     star.starSize = StellarData.starSize.V
-  } else if (star.starSize == StellarData.starSize.VI &&
-    (star.starType == StellarData.starType.B || star.starType == StellarData.starType.A ||
-    (star.starType == StellarData.starType.F && star.classification < 5))) {
+  } else if (star.starSize === StellarData.starSize.VI &&
+    (star.starType === StellarData.starType.B || star.starType === StellarData.starType.A ||
+    (star.starType === StellarData.starType.F && star.classification < 5))) {
     star.starSize = StellarData.starSize.V
   }
 
@@ -176,9 +174,13 @@ function validateStar(star) {
 // }
 
 function getSystemNature() {
+    if (GenConfig.getSystemNature() !== null) {
+        return GenConfig.getSystemNature()
+    }
+    console.log('should not get here')
     var roll = twoD6()
 
-    if (true || roll < 8) {
+    if (roll < 8) {
         return 1
     } else if (roll < 12) {
         return 2
@@ -188,62 +190,66 @@ function getSystemNature() {
 }
 
 function getStarType(primaryType) {
-  var roll = r.integer(1, 10000)
-  var result = {}
-
-  if (primaryType) {
-    // companion star
-    roll = roll + primaryType.typeDM
-    result.typeDM = 0
-    if (roll < 14) {
-      result.typeDM = 10
-      result.starType = StellarData.starType.B
-    } else if (roll < 75) {
-      result.typeDM = 60
-      result.starType = StellarData.starType.A
-    } else if (roll < 476) {
-      result.typeDM = 300
-      result.starType = StellarData.starType.F
-    } else if (roll < 1333) {
-      result.typeDM = 760
-      result.starType = StellarData.starType.G
-    } else if (roll < 2843) {
-      result.typeDM = 1010
-      result.starType = StellarData.starType.K
-    } else {
-      result.typeDM = 5000
-      result.starType = StellarData.starType.M
+    if (GenConfig.getStarType(null) !== null) {
+        return GenConfig.getStarType(primaryType)
     }
+    console.log('should not get here')
+    var roll = r.integer(1, 10000)
+    var result = {}
 
-  } else {
-    // primary star
-    if (roll < 14) {
-      result.typeDM = 10
-      result.starType = StellarData.starType.B
-    } else if (roll < 53) {
-      result.typeDM = 60
-      result.starType = StellarData.starType.A
-    } else if (roll < 476) {
-      result.typeDM = 300
-      result.starType = StellarData.starType.F
-    } else if (roll < 1160) {
-      result.typeDM = 760
-      result.starType = StellarData.starType.G
-    } else if (roll < 2943) {
-      result.typeDM = 1010
-      result.starType = StellarData.starType.K
+    if (primaryType) {
+        // companion star
+        roll = roll + primaryType.typeDM
+        result.typeDM = 0
+        if (roll < 14) {
+        result.typeDM = 10
+        result.starType = StellarData.starType.B
+        } else if (roll < 75) {
+        result.typeDM = 60
+        result.starType = StellarData.starType.A
+        } else if (roll < 476) {
+        result.typeDM = 300
+        result.starType = StellarData.starType.F
+        } else if (roll < 1333) {
+        result.typeDM = 760
+        result.starType = StellarData.starType.G
+        } else if (roll < 2843) {
+        result.typeDM = 1010
+        result.starType = StellarData.starType.K
+        } else {
+        result.typeDM = 5000
+        result.starType = StellarData.starType.M
+        }
+
     } else {
-      result.typeDM = 5000
-      result.starType = StellarData.starType.M
+        // primary star
+        if (roll < 14) {
+        result.typeDM = 10
+        result.starType = StellarData.starType.B
+        } else if (roll < 53) {
+        result.typeDM = 60
+        result.starType = StellarData.starType.A
+        } else if (roll < 476) {
+        result.typeDM = 300
+        result.starType = StellarData.starType.F
+        } else if (roll < 1160) {
+        result.typeDM = 760
+        result.starType = StellarData.starType.G
+        } else if (roll < 2943) {
+        result.typeDM = 1010
+        result.starType = StellarData.starType.K
+        } else {
+        result.typeDM = 5000
+        result.starType = StellarData.starType.M
+        }
     }
-  }
-  if (result.starType === StellarData.starType.O) {
-    result.classification = r.integer(5,9)
-  } else {
-    result.classification = r.integer(0,9)
-  }
-  
-  return result  
+    if (result.starType === StellarData.starType.O) {
+        result.classification = r.integer(5,9)
+    } else {
+        result.classification = r.integer(0,9)
+    }
+    
+    return result  
 }
 
 function getPrimarySize(primaryStar) {
@@ -298,23 +304,23 @@ function getCompanionSize(star, sizeDM) {
   roll += sizeDM
   
   var result = star
-  if (roll == 2 && subRoll < 10) {
+  if (roll === 2 && subRoll < 10) {
     result.sizeDM = 0
     result.starSize = StellarData.starSize.Ia
     result.orbitsDM = 8
-  } else if (roll == 2 && subRoll < 30) {
+  } else if (roll === 2 && subRoll < 30) {
     result.sizeDM = 1
     result.starSize = StellarData.starSize.Ib
     result.orbitsDM = 8
-  } else if (roll == 2) {
+  } else if (roll === 2) {
     result.sizeDM = 2
     result.starSize = StellarData.starSize.II
     result.orbitsDM = 8
-  } else if (roll == 3) {
+  } else if (roll === 3) {
     result.sizeDM = 3
     result.starSize = StellarData.starSize.III
     result.orbitsDM = 4
-  } else if (roll == 4) {
+  } else if (roll === 4) {
     result.sizeDM = 4
     result.starSize = StellarData.starSize.IV
     result.orbitsDM = 0

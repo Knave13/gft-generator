@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import StellarData from '../data/stellarData'
+import StarAstronomics from './starAstronomics'
 
 export default class StarSystem extends Component {
     constructor(props) {
@@ -15,29 +16,35 @@ export default class StarSystem extends Component {
     render () {
         const divStyle = {
             'paddingTop': '10px',
-            'paddingBottom': '10px'
+            'paddingBottom': '10px',
+            'paddingLeft': '150px',
+            'textAlign': 'left'
         }
-        var name, starKey, friendlyType, friendlySize
+
         if (this.props.starSystem == null) {
-            starKey = ''
-            name = 'No Star System loaded'
-        } else {
-            name = this.props.starSystem.name
-            starKey = this.props.starSystem.primaryStar.typeCode + " " + this.props.starSystem.primaryStar.sizeCode
-            friendlyType = StellarData.starTypeColor[this.props.starSystem.primaryStar.typeCode]
-            friendlySize = StellarData.starSizeName[this.props.starSystem.primaryStar.sizeCode]
-            console.log(JSON.stringify(this.props.starSystem.primaryStar.typeCode, null, 2))
-        }
-        return (
-            <div className='container' style={divStyle}>
-                <h1>{name}</h1>
-                <br/>
-                <div>
-                    {starKey}
-                    <br/>
-                    {friendlyType} {friendlySize}
+            return (
+                <div className='container' style={divStyle}>
+                    <h1>No sytem loaded</h1>
                 </div>
-            </div>
-        )
+            )
+
+        } else {
+            let starKey = this.props.starSystem.primaryStar.typeCode + this.props.starSystem.primaryStar.classification + " " + this.props.starSystem.primaryStar.sizeCode
+            let friendlyType = StellarData.starTypeColor[this.props.starSystem.primaryStar.typeCode]
+            let friendlySize = StellarData.starSizeName[this.props.starSystem.primaryStar.sizeCode]
+
+            return (
+                <div className='container' style={divStyle}>
+                    <h1>{this.props.starSystem.name}</h1>
+                    <br/>
+                    <div>
+                        {starKey}
+                        <br/>
+                        {friendlyType}({this.props.starSystem.primaryStar.classification}) {friendlySize}
+                    </div>
+                    <StarAstronomics astronomics={this.props.starSystem.astronomics} />
+                </div>
+            )
+        }
     }
 }
