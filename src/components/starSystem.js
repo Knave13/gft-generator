@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import StellarData from '../data/stellarData'
 import StarAstronomics from './starAstronomics'
+import Planets from './planets'
 
 export default class StarSystem extends Component {
     constructor(props) {
@@ -24,7 +25,7 @@ export default class StarSystem extends Component {
         if (this.props.starSystem == null) {
             return (
                 <div className='container' style={divStyle}>
-                    <h1>No sytem loaded</h1>
+                    <h1>No system loaded</h1>
                 </div>
             )
 
@@ -43,8 +44,10 @@ export default class StarSystem extends Component {
                         {friendlyType}({this.props.starSystem.primaryStar.classification}) {friendlySize}
                     </div>
                     <StarAstronomics astronomics={this.props.starSystem.astronomics} />
+                    <Planets starData={this.props.starSystem.primaryStar}/>
                 </div>
             )
         }
     }
+
 }

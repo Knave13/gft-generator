@@ -1,7 +1,6 @@
 var StellarData  = require('../data/stellarData')
 var GenConfig = require('./generator-config')
 var Random = require('random-js')
-//var gen = require('./generate-name')
 var r = new Random()
 
 var generator = {
@@ -38,7 +37,7 @@ var generator = {
       primaryStar.suffix = StellarData.latinSuffix[1]
     }
     generatorDetails.starList.push(primaryStar)
-
+    primaryStar.companions = []
     // for a star system that is not solitary
     for (var i=1; i<nature; i++) {
       // these companion stars are primary companions
