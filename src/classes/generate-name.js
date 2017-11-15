@@ -53,7 +53,7 @@ var _swearWords = [
                     "chink", "clit", "cum", "slut", "slag", "dego", "dildo", "dyke", "dike", "fag", "gay", "kike", "skank", 
                     "hootch", "hooch", "kyke", "lesbo", "jesus", "mick", "muff", "nig", "nut", "negro", "black", "piss",
                     "pecker", "pussi", "queef", "qeef", "scrot", "spic", "smeg", "spick", "vajina", "vag", "whore", "wop",
-                    "bra", "prik", "sex", "penus", "penas"]
+                    "bra", "prik", "sex", "penus", "penas", "fart"]
 
 var _vowelCount = _vowel.length
 var _consonantCount = _consonant.length

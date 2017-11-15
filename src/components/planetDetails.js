@@ -32,6 +32,6 @@ export default class StarSystem extends Component {
         )
     }
     showPlanetDetails() {
-        console.log(JSON.stringify(this.props.planetData, null, 2))
+        //console.log(JSON.stringify(this.props.planetData, null, 2))
     }
 }

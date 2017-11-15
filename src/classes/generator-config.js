@@ -1,14 +1,23 @@
 var StellarData  = require('../data/stellarData')
 var Random = require('random-js')
 var r = new Random()
+var options = {}
 
 function getSystemNatureOverride() {
-    return 1
+    if (options.nature) {
+        return options.nature
+    } else {
+        return 1
+    }
 }
 
 function getStarTypeOverride(primaryType) {
     var roll = r.integer(1, 10000)
     var result = {}
+
+    if (options.sol) {
+        roll = 2500 // force G Type
+    }
 
     // ignore primary star since this override assumes a solitary system
     if (roll < 64) {
@@ -31,7 +40,9 @@ function getStarTypeOverride(primaryType) {
         result.starType = StellarData.starType.M
     }
 
-    if (result.starType === StellarData.starType.O) {
+    if (options.sol) {
+        result.classification = 3
+    } else if (result.starType === StellarData.starType.O) {
         result.classification = r.integer(5,9)
     } else {
         result.classification = r.integer(0,9)
@@ -41,6 +52,10 @@ function getStarTypeOverride(primaryType) {
 }
 
 var generatorConfig = {
+    initConfig: (optionData) => {
+        options = optionData
+    },
+    options: options,
     getSystemNature: () => {
         return getSystemNatureOverride()
     },

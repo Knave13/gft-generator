@@ -197,6 +197,7 @@ var stellarData = {
   cloudiness: cloudiness,
   greenhouse: greenhouse,
   albedo: albedo,
+  kelvin: -273.15,
   stellarRadiusConstant: stellarRadiusConstant,
   stellarPeriodConstant: stellarPeriodConstant,
   planetaryZone: (zone, callback) => {

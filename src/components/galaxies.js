@@ -58,11 +58,15 @@ export default class Galaxies extends Component {
 
     addStarSystem() {
         NameGen.generateName((name) => {
-            var star = StarGen.generateStarSystem(5, name)
+            let options = {
+                sol: true,
+                nature: 1
+            }
+            var star = StarGen.generateStarSystem(5, name, options)
             Astronomics.findByKey(this.props.database, star.primaryStarKeyCode, (data) => {
-                console.log('Astronomics', JSON.stringify(data, null, 2))
+                //console.log('Astronomics', JSON.stringify(data, null, 2))
                 star.astronomics = data
-                console.log(JSON.stringify(star, null, 2))
+                //console.log(JSON.stringify(star, null, 2))
                 this.setState({starSystem: star})
              })
             

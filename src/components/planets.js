@@ -27,7 +27,7 @@ export default class StarSystem extends Component {
             color: 'black',
             'borderSpacing': '0px'
         }
-
+//(this.state.planetData.orbitData.orbits[j].temperate > 100) ? {color: 'red'} : ''
         if (this.props.starData == null) {
             return (
                 <div className='container' style={divStyle}>
@@ -78,8 +78,11 @@ export default class StarSystem extends Component {
                                             <td>
                                                 {this.state.planetData.orbitData.orbits[j].details && this.state.planetData.orbitData.orbits[j].details.atmosphere}
                                             </td>
-                                            <td>
-                                                {this.state.planetData.orbitData.orbits[j].details && this.state.planetData.orbitData.orbits[j].details.temperature}
+                                            {console.log(JSON.stringify(this.state.planetData.orbitData.orbits[j].details, null, 2))}
+                                            <td style={(this.state.planetData.orbitData.orbits[j].details 
+                                                && this.state.planetData.orbitData.orbits[j].details.temperature > 100.0) ? {color: 'red'} : {color: 'blue'}}>
+                                                {this.state.planetData.orbitData.orbits[j].details 
+                                                    && this.state.planetData.orbitData.orbits[j].details.temperature}
                                             </td>
                                             <td>
                                                 {this.state.planetData.orbitData.orbits[j].details && this.state.planetData.orbitData.orbits[j].details.moons}
@@ -100,9 +103,12 @@ export default class StarSystem extends Component {
 
     
     addPlanets() {
-        console.log(JSON.stringify(this.props.starData, null, 2))
-        GenPlanets.generatePlanetaryBodies(this.props.starData, (planetData) => {
-            console.log(JSON.stringify(planetData, null, 2))
+        //console.log(JSON.stringify(this.props.starData, null, 2))
+        let options = {
+            sol: true
+        }
+        GenPlanets.generatePlanetaryBodies(this.props.starData, options, (planetData) => {
+            //console.log(JSON.stringify(planetData, null, 2))
             this.setState({ "planetData" : planetData })
         })
     }
