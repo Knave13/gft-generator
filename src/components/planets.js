@@ -3,6 +3,7 @@ import GenPlanets from '../classes/generate-planets'
 import StellarData from '../data/stellarData'
 import StarAstronomics from './starAstronomics'
 import PlanetDetails from './planetDetails'
+import DataField from './dataField'
 
 export default class StarSystem extends Component {
     constructor(props) {
@@ -26,6 +27,38 @@ export default class StarSystem extends Component {
         const tableStyle = {
             color: 'black',
             'borderSpacing': '0px'
+        }
+        const tempOptions = {
+            precision: 4,
+            units: 'C',
+            defaultStyle: {
+                'color': 'black'
+            },
+            styles: [ {
+                    val: 0,
+                    style: {
+                        'color': 'blue'
+                    } 
+                }, {
+                    val: 50,
+                    style: {
+                        'color': 'green'
+                    }
+                }, {
+                    val: 10000,
+                    style: {
+                        'color': 'red'
+                    }
+                }
+            ]
+        }
+        const numberOptions = {
+            precision: 4,
+            units: '',
+            defaultStyle: {
+                'color': 'black'
+            },
+            styles: []
         }
 //(this.state.planetData.orbitData.orbits[j].temperate > 100) ? {color: 'red'} : ''
         if (this.props.starData == null) {
@@ -59,6 +92,8 @@ export default class StarSystem extends Component {
                                         <th>Radiius</th>
                                         <th>Atmosphere</th>
                                         <th>Temperature</th>
+                                        <th>Period</th>
+                                        <th>Gravity</th>
                                         <th>Moons</th>
                                     </tr>
                                     {Array.apply(0, Array(this.state.planetData.orbitData.orbits.length)).map((x, j) =>
@@ -78,12 +113,17 @@ export default class StarSystem extends Component {
                                             <td>
                                                 {this.state.planetData.orbitData.orbits[j].details && this.state.planetData.orbitData.orbits[j].details.atmosphere}
                                             </td>
-                                            {console.log(JSON.stringify(this.state.planetData.orbitData.orbits[j].details, null, 2))}
-                                            <td style={(this.state.planetData.orbitData.orbits[j].details 
-                                                && this.state.planetData.orbitData.orbits[j].details.temperature > 100.0) ? {color: 'red'} : {color: 'blue'}}>
-                                                {this.state.planetData.orbitData.orbits[j].details 
-                                                    && this.state.planetData.orbitData.orbits[j].details.temperature}
+                                            <td>
+                                                <DataField options={tempOptions} data={this.state.planetData.orbitData.orbits[j].details 
+                                                    && this.state.planetData.orbitData.orbits[j].details.temperature } />
                                             </td>
+                                            <td>
+                                                <DataField options={numberOptions} data={this.state.planetData.orbitData.orbits[j].details
+                                                    && this.state.planetData.orbitData.orbits[j].details.physics.periodDays } />
+                                            </td>                                            
+                                            <td>
+                                            <DataField options={numberOptions} data={this.state.planetData.orbitData.orbits[j].details 
+                                                && this.state.planetData.orbitData.orbits[j].details.physics.gravity } />                                            </td>                                            
                                             <td>
                                                 {this.state.planetData.orbitData.orbits[j].details && this.state.planetData.orbitData.orbits[j].details.moons}
                                             </td>

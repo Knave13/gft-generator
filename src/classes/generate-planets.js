@@ -24,7 +24,7 @@ var generator = {
         for (var i = 0; i < systemData.orbitData.gasGiants; i++) {
             var orbit = pickAvailableOrbit(['H', 'O'], systemData)
             if (options.sol) {
-                orbit = i + 5
+                orbit = i + 6
             }
 
             if (orbit !== -1) {
@@ -41,7 +41,7 @@ var generator = {
                 orbit = pickAvailableOrbit(['I', 'H', 'O'], systemData)
             }
             if (options.sol) {
-                orbit = 4
+                orbit = 5
             }
             
             if (orbit !== -1) {
@@ -54,6 +54,9 @@ var generator = {
         // empty orbits
         for (var i = 0; i < systemData.orbitData.emptyOrbits; i++) {
             var orbit = pickAvailableOrbit(['I', 'H', 'O'], systemData, true)
+            if (options.sol) {
+                orbit = 0
+            }
 
             if (orbit !== -1) {
                 systemData.orbitData.orbits[orbit].available = false
@@ -107,26 +110,42 @@ function processOrbits(systemData) {
         switch(orbit.orbitType) {
             case StellarData.orbitType.GasGiant:
                 if (options.sol) {
-                    if (i == 5) {
+                    if (i == 6) {
                         orbitDetails.size = 'Large'
                         orbitDetails.radius = 69911
                         orbitDetails.moons = 27
                         orbitDetails.temperature = 'Hot'
-                    } else if (i == 6) {
+                        orbitDetails.physics = {
+                            periodDays : 0,
+                            gravity : 0
+                        }
+                    } else if (i == 7) {
                         orbitDetails.size = 'Large'
                         orbitDetails.radius = 58232
                         orbitDetails.moons = 18
                         orbitDetails.temperature = 'Hot'
-                    } else if (i == 7) {
+                        orbitDetails.physics = {
+                            periodDays : 0,
+                            gravity : 0
+                        }
+                    } else if (i == 8) {
                         orbitDetails.size = 'Small'
                         orbitDetails.radius = 24622
                         orbitDetails.moons = 7
                         orbitDetails.temperature = 'Cold'
-                    } else if (i == 8) {
+                        orbitDetails.physics = {
+                            periodDays : 0,
+                            gravity : 0
+                        }
+                    } else if (i == 9) {
                         orbitDetails.size = 'Small'
                         orbitDetails.radius = 25362
                         orbitDetails.moons = 4
                         orbitDetails.temperature = 'Cold'
+                        orbitDetails.physics = {
+                            periodDays : 0,
+                            gravity : 0
+                        }
                     }
                 } else {
                     if (flip()) {
@@ -143,7 +162,11 @@ function processOrbits(systemData) {
                     orbitDetails.moons = moons
                     orbitDetails.rings = 'TBD'
                     orbitDetails.temperature = flip() ? 'Hot' : 'Cold'
-                }
+                    orbitDetails.physics = {
+                        periodDays : 0,
+                        gravity : 0
+                    }
+        }
                 systemData.orbitData.orbits[i].details = orbitDetails
             break
 
@@ -186,19 +209,19 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
         planetDetails.radius = roll * 1600 + r.integer(-10, 10) * 80 // 1600 * size +/- 800 in km
         
         if (options.sol) {
-            if (orbit == 0) {
+            if (orbit == 1) {
                 moons = 0
                 atmo = 0
                 planetDetails.radius = 2440
-            } else if (orbit == 1) {
+            } else if (orbit == 2) {
                 moons = 0
                 atmo = 11
                 planetDetails.radius = 6052
-            } else if (orbit == 2) {
+            } else if (orbit == 3) {
                 moons = 1
                 atmo = 6
                 planetDetails.radius = 6371
-            } else if (orbit == 3) {
+            } else if (orbit == 4) {
                 moons = 2
                 atmo = 3
                 planetDetails.radius = 3390
@@ -220,10 +243,30 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
             var atmoMod = atmo <= 1 || atmo >= 10 ? -4 : 0
             var hydroRoll = twoD6() - 7 + modifiers.hydroMod + roll + atmoMod
             hydroRoll = hydroRoll < 0 ? 0 : (hydroRoll > 10 ? 10 : hydroRoll)
+            if (options.sol) {
+                if (orbit == 3) {
+                    hydroRoll = 7
+                } else {
+                    hydroRoll = 0
+                }
+            }
             planetDetails.hydrographics = hydroRoll === 0 ? 'None' : (hydroRoll * 10) + '%'
             planetDetails.hydroPercentage = hydroRoll * 10
         }
-        density = 1.0 + r.integer(-1, 1) / 10
+        if (options.sol) {
+            if (orbit == 1) {
+                density = 0.982
+            } else if (orbit == 2) {
+                density = 0.945
+            } else if (orbit == 3) {
+            density = 1.0
+            } else if (orbit == 4) {
+                density = 0.709
+            }
+        } else {
+            //TODO Make sure the random number is a float
+            density = 1.0 + r.integer(-20, 20) / 100
+        }
     }
     planetDetails.physics = calculatePlanetaryDetails(planetDetails.radius, orbit, density, stellarData.mass, 0)
     planetDetails.albedoData = calculateAlbedo(orbit, stellarData.luminosity, planetDetails)
@@ -317,15 +360,15 @@ function findInArray(val, array) {
     return false
 }
 
-function calculatePlanetaryDetails(diameter, orbit, density, stellarMass, orbitalOffset) {
+function calculatePlanetaryDetails(radius, orbit, density, stellarMass, orbitalOffset) {
     var orbitalDistance = StellarData.radiusau[orbit] + orbitalOffset
-    var gravity = (density * Math.pow(diameter / StellarData.stellarRadiusConstant, 3)) * ((StellarData.stellarRadiusConstant * StellarData.stellarRadiusConstant) / (diameter * diameter))
+    var gravity = (density * Math.pow(radius / StellarData.stellarRadiusConstant, 3)) * ((StellarData.stellarRadiusConstant * StellarData.stellarRadiusConstant) / (radius * radius))
     var data = {
-        "radius": diameter / 2.0,
+        "radius": radius,
         "density": density,
-        "volume": Math.pow(diameter / StellarData.stellarRadiusConstant, 3),
-        "mass": density * Math.pow(diameter / StellarData.stellarRadiusConstant, 3),
-        "area": Math.pow(diameter / StellarData.stellarRadiusConstant, 2),
+        "volume": Math.pow(radius / StellarData.stellarRadiusConstant, 3),
+        "mass": density * Math.pow(radius / StellarData.stellarRadiusConstant, 3),
+        "area": Math.pow(radius / StellarData.stellarRadiusConstant, 2),
         "gravity": gravity,
         "escapeVelocidy": gravity * 11.208,
         "period": Math.sqrt(Math.pow(orbitalDistance, 3) / stellarMass),
@@ -394,9 +437,9 @@ function calculateAlbedo(orbit, luminosity, planetData) {
     data.surface = surface
 
     return data
-    }
+}
 
-    function calculateGreenhouse(atmoCode) {
+function calculateGreenhouse(atmoCode) {
     // calculate the greenhouse effect based on the specified atmosphere code
     // Result is a percentage increase +100%, 1.0 - 1.7
     //console.log('AtmoCode', atmoCode, 'greenhouse', StellarData.greenhouse[atmoCode])
@@ -523,7 +566,7 @@ function getSystemProperties(maxOrbits, availableOrbits) {
 function getMaximumOrbits (starType, starSize) {
     var roll = twoD6()
     if (options.sol) {
-        return 9
+        return 10
     }
 
     if (starSize == StellarData.starSize.III) {
@@ -549,7 +592,7 @@ function getEmptyOrbits (systemData) {
     var roll = d6()
     var result = 0
     if (options.sol) {
-        return 0
+        return 1
     }
 
     if (roll > 4) {

@@ -41,7 +41,7 @@ function getStarTypeOverride(primaryType) {
     }
 
     if (options.sol) {
-        result.classification = 3
+        result.classification = 2
     } else if (result.starType === StellarData.starType.O) {
         result.classification = r.integer(5,9)
     } else {

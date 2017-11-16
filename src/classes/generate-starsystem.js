@@ -258,7 +258,7 @@ function getPrimarySize(primaryStar) {
     var result = primaryStar
     console.log(JSON.stringify(GenConfig.options, null, 2))
     if (options.sol) {
-        roll = 950
+        roll = 850
     }
 
     if (roll < 10) {

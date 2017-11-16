@@ -8,7 +8,7 @@ var albedo = {"Veldt": 0.1, "Desert": 0.2, "Water": 0.02, "Ice": 0.85, "Snow": 0
 // var axialTilt = [0, 1.7, 1.6, 1.5, 1.3, 1.2, 1.0, 1.24, 1.16, 1.09, 1.0 ]
 // var              0, 17   34    50   66   77   87   93   98   100
 
-var stellarRadiusConstant = 12800.0
+var stellarRadiusConstant = 6371.0
 var stellarPeriodConstant = 365.24
 var suffixes = ['Greek', 'Latin', 'Numeric', 'Roman']
 var greekSuffixes = [
