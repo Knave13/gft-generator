@@ -3,7 +3,11 @@ import logo from './logo.svg';
 import './App.css';
 import firebase from 'firebase'
 import 'firebase/firestore'
-import Galaxies from './components/galaxies'
+import {
+  BrowserRouter as Router,
+  Route
+} from 'react-router-dom'
+import Home from './components/home'
 import Astronomics from './data/astronomics'
 import StellarData from './data/stellarData'
 
@@ -27,17 +31,16 @@ firebase.initializeApp(config);
 // console.log('End Auth')
 
 var db = firebase.firestore()
-var galaxiesRef = db.collection('galaxies')
 Astronomics.initializeData(db, (dataLoaded) => {
   console.log('Astronomics Loaded: ', dataLoaded)
 });
-Astronomics.findByKey(db, 'G4V', (data) => {
-   console.log('Astronomics', JSON.stringify(data, null, 2))
-})
+// Astronomics.findByKey(db, 'G4V', (data) => {
+//    console.log('Astronomics', JSON.stringify(data, null, 2))
+// })
 StellarData.database(db)
-StellarData.stellarDataByKey('G4V', (data) => {
-  console.log('Astronomics', JSON.stringify(data, null, 2))
-})
+// StellarData.stellarDataByKey('G4V', (data) => {
+//   console.log('Astronomics', JSON.stringify(data, null, 2))
+// })
 
 //console.log('Galaxies', galaxiesRef.docs.length)
 // galaxiesRef.doc().set({
@@ -56,12 +59,6 @@ StellarData.stellarDataByKey('G4V', (data) => {
 class App extends Component {
   constructor(props) {
     super(props)
-    this.state = { "count": -1 }
-    galaxiesRef.get().then(data => {
-      this.setState({"count" : data.size})
-
-      console.log(data.size)
-    })
   }
 
   render() {
@@ -71,17 +68,28 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Galaxies: {this.state.count}
-        </p>
-        <Galaxies database={db}/>
+        <Router>
+          <PropsRoute path="/" component={Home} db={db} />
+      </Router>
       </div>
     )
   }
 
+}
+
+const renderMergedProps = (component, ...rest) => {
+  const finalProps = Object.assign({}, ...rest);
+  return (
+    React.createElement(component, finalProps)
+  );
+}
+
+const PropsRoute = ({ component, ...rest }) => {
+  return (
+    <Route {...rest} render={routeProps => {
+      return renderMergedProps(component, routeProps, rest);
+    }}/>
+  );
 }
 
 export default App;

@@ -1,6 +1,4 @@
 import React, { Component } from 'react'
-import GenPlanets from '../classes/generate-planets'
-import StellarData from '../data/stellarData'
 
 export default class StarSystem extends Component {
     constructor(props) {
@@ -15,16 +13,6 @@ export default class StarSystem extends Component {
     }
 
     render () {
-        const divStyle = {
-            'paddingTop': '10px',
-            'paddingBottom': '10px',
-            'paddingLeft': '10px',
-            'textAlign': 'left'
-        }
-        const tableStyle = {
-            color: 'black',
-            'borderSpacing': '0px'
-        }
         return (
             <div>
                 <button onClick={this.showPlanetDetails.bind(this)}>Details</button>

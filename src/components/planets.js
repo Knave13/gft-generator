@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
 import GenPlanets from '../classes/generate-planets'
-import StellarData from '../data/stellarData'
-import StarAstronomics from './starAstronomics'
 import PlanetDetails from './planetDetails'
 import DataField from './dataField'
 
@@ -69,7 +67,7 @@ export default class StarSystem extends Component {
             )    
         } else {
             console.log("state", JSON.stringify(this.state, null, 2))
-            if (this.state.planetData == "") {
+            if (this.state.planetData === '') {
                 return (
                     <div>
                         <h1>No Planets Loaded</h1>
@@ -96,39 +94,39 @@ export default class StarSystem extends Component {
                                         <th>Gravity</th>
                                         <th>Moons</th>
                                     </tr>
-                                    {Array.apply(0, Array(this.state.planetData.orbitData.orbits.length)).map((x, j) =>
+                                    {Array.apply(0, Array(orbitData.orbits.length)).map((x, j) =>
                                         <tr key={j}>
                                             <td>
                                                 {j}
                                             </td>
                                             <td>
-                                                {this.state.planetData.orbitData.orbits[j].orbitZoneCode}
+                                                {orbitData.orbits[j].orbitZoneCode}
                                             </td>
                                             <td>
-                                                {this.state.planetData.orbitData.orbits[j].orbitType}
+                                                {orbitData.orbits[j].orbitType}
                                             </td>
                                             <td>
-                                                {this.state.planetData.orbitData.orbits[j].details && this.state.planetData.orbitData.orbits[j].details.radius}
+                                                {orbitData.orbits[j].details && orbitData.orbits[j].details.radius}
                                             </td>
                                             <td>
-                                                {this.state.planetData.orbitData.orbits[j].details && this.state.planetData.orbitData.orbits[j].details.atmosphere}
+                                                {orbitData.orbits[j].details && orbitData.orbits[j].details.atmosphere}
                                             </td>
                                             <td>
-                                                <DataField options={tempOptions} data={this.state.planetData.orbitData.orbits[j].details 
-                                                    && this.state.planetData.orbitData.orbits[j].details.temperature } />
+                                                <DataField options={tempOptions} data={orbitData.orbits[j].details 
+                                                    && orbitData.orbits[j].details.temperature } />
                                             </td>
                                             <td>
-                                                <DataField options={numberOptions} data={this.state.planetData.orbitData.orbits[j].details
-                                                    && this.state.planetData.orbitData.orbits[j].details.physics.periodDays } />
+                                                <DataField options={numberOptions} data={orbitData.orbits[j].details
+                                                    && orbitData.orbits[j].details.physics.periodDays } />
                                             </td>                                            
                                             <td>
-                                            <DataField options={numberOptions} data={this.state.planetData.orbitData.orbits[j].details 
-                                                && this.state.planetData.orbitData.orbits[j].details.physics.gravity } />                                            </td>                                            
+                                                <DataField options={numberOptions} data={orbitData.orbits[j].details 
+                                                    && orbitData.orbits[j].details.physics.gravity } />                                            </td>                                            
                                             <td>
-                                                {this.state.planetData.orbitData.orbits[j].details && this.state.planetData.orbitData.orbits[j].details.moons}
+                                                {orbitData.orbits[j].details && orbitData.orbits[j].details.moons}
                                             </td>
                                             <td>
-                                                <PlanetDetails planetData={this.state.planetData.orbitData.orbits[j]} />
+                                                <PlanetDetails planetData={orbitData.orbits[j]} />
                                             </td>
                                         </tr>
                                     )}

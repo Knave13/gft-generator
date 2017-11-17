@@ -16,10 +16,6 @@ export default class Galaxies extends Component {
     }
 
     componentWillMount() {
-        firebase.firestore().collection('galaxies').get().then((data) => {
-            console.log(data)
-            this.setState({dataSize: data.size})
-        })
     }
 
     componentDidMount() {
@@ -34,8 +30,6 @@ export default class Galaxies extends Component {
         return (
             <div className='container' style={divStyle}>
                 <h1>Welcome to the GFT Galaxy Generator</h1>
-                <br/>
-                <label>Galaxy Count {this.state.dataSize}</label>
                 <br/>
                 <button onClick={this.addGalaxy}>Add Galaxy</button>
                 <button onClick={this.addStarSystem.bind(this)}>Add Star System</button>

@@ -35,15 +35,15 @@ export default class DataField extends Component {
                 </div>
             )
         } else {
-            var dataStyle = this.props.options.defaultStyle
-            for (var i = 0; i < this.props.options.styles.length; i++) {
+            let dataStyle = this.props.options.defaultStyle
+            for (let i = 0; i < this.props.options.styles.length; i++) {
                 if (this.props.data < this.props.options.styles[i].val) {
                     dataStyle = this.props.options.styles[i].style
                     break
                 }
             }
-            var num = new Number(this.props.data)
-            var output = num.toPrecision(this.props.options.precision)
+            
+            let output = this.props.data.toPrecision(this.props.options.precision)
             if (this.props.options.units) {
                 output += ' ' + this.props.options.units
             }
