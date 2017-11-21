@@ -1,30 +1,21 @@
 import React, { Component } from 'react'
 
 export default class DataField extends Component {
-    constructor(props) {
-        super(props)
-        // props.data = number
-        // props.options = {
-        //  precision: 3,
-        //  units: 'C',
-        //  styles: [ {
-        //   val: 100,
-        //   style: {} 
-        //   }, {
-        //   val: 1000,
-        //   style: {} 
-        //   },
-        //   etc...
-        //  ]
-        // }
-        //        
-    }
-
-    componentWillMount() {
-    }
-
-    componentDidMount() {
-    }
+    // props.data = number
+    // props.options = {
+    //  precision: 3,
+    //  units: 'C',
+    //  styles: [ {
+    //   val: 100,
+    //   style: {} 
+    //   }, {
+    //   val: 1000,
+    //   style: {} 
+    //   },
+    //   etc...
+    //  ]
+    // }
+    // 
 
     render () {
         // grab the last option as the else clause or to handle a single style

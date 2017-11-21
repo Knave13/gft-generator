@@ -5,10 +5,14 @@ import firebase from 'firebase'
 import 'firebase/firestore'
 import {
   BrowserRouter as Router,
-  Route
+  Route,
+  Link,
+  Switch
 } from 'react-router-dom'
 import Home from './components/home'
-import Astronomics from './data/astronomics'
+import Galaxy from './components/galaxies'
+import GalaxyList from './components/galaxyList'
+import Astronomics from './data/fileAstronomics'
 import StellarData from './data/stellarData'
 
 // Initialize Firebase
@@ -31,16 +35,6 @@ firebase.initializeApp(config);
 // console.log('End Auth')
 
 var db = firebase.firestore()
-Astronomics.initializeData(db, (dataLoaded) => {
-  console.log('Astronomics Loaded: ', dataLoaded)
-});
-// Astronomics.findByKey(db, 'G4V', (data) => {
-//    console.log('Astronomics', JSON.stringify(data, null, 2))
-// })
-StellarData.database(db)
-// StellarData.stellarDataByKey('G4V', (data) => {
-//   console.log('Astronomics', JSON.stringify(data, null, 2))
-// })
 
 //console.log('Galaxies', galaxiesRef.docs.length)
 // galaxiesRef.doc().set({
@@ -57,19 +51,18 @@ StellarData.database(db)
 
 //console.log(count)
 class App extends Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1 className="App-title">GFT Galaxy Generator</h1>
         </header>
         <Router>
-          <PropsRoute path="/" component={Home} db={db} />
+          <Switch> 
+            <PropsRoute path="/galaxy" component={GalaxyList} db={db} foo={5}/>
+            <PropsRoute path="/" component={Home} db={db} />
+          </Switch>
       </Router>
       </div>
     )

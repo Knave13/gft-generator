@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-export default class StarSystem extends Component {
+export default class PlanetDetails extends Component {
     constructor(props) {
         super(props)       
     }

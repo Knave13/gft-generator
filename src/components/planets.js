@@ -3,16 +3,9 @@ import GenPlanets from '../classes/generate-planets'
 import PlanetDetails from './planetDetails'
 import DataField from './dataField'
 
-export default class StarSystem extends Component {
-    constructor(props) {
-        super(props)       
-    }
-
+export default class Planets extends Component {
     componentWillMount() {
         this.setState({"planetData": ""})
-    }
-
-    componentDidMount() {
     }
 
     render () {

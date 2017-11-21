@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
-import Galaxies from './galaxies'
+import {Link} from 'react-router-dom'
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <Galaxies database={this.props.db}/>
-      </div>
-    )
-  }
-
+export default class Home extends Component {
+    render() {       
+        return (
+            <div className="App">
+                <Link to='/'>Home</Link>
+                <Link to='/galaxy'>Galaxies</Link>
+                <br/>
+                <h1>Home</h1>
+            </div>
+        )
+    }
 }
 
-export default App;
