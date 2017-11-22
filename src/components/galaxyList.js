@@ -1,7 +1,5 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import firebase from 'firebase'
-import 'firebase/firestore'
 import Galaxy from './galaxy'
 
 export default class GalaxyList extends Component {
@@ -13,21 +11,22 @@ export default class GalaxyList extends Component {
         let galaxies = []
 
         console.log('getting galaxies')
-        galaxiesRef.get()
+        galaxiesRef
+            .get()
             .then(query => {
                 query.forEach(x => {
-                    galaxies.push({id: x.id, data: x.data()})
+                    galaxies.push({
+                        id: x.id,
+                        data: x.data()
+                    })
                 })
                 this.setState({galaxies: galaxies})
                 console.log('count', galaxies.length)
                 console.log(JSON.stringify(galaxies, null, 2))
-            }) 
+            })
     }
-    
-    render () {
-        console.log('render galaxy list')
-        console.log(JSON.stringify(this.state.galaxies, null, 2))
-        let count = 0
+
+    render() {
         if (this.state.galaxies === '') {
             return (
                 <div>
@@ -43,9 +42,10 @@ export default class GalaxyList extends Component {
                     <Link to="/">Go Home</Link>
                     <h1>Galaxy list</h1>
                     <div>
-                        {this.state.galaxies.map((item, i) => 
-                            <Galaxy data={item.data} id={item.id} />
-                        )}
+                        {this
+                            .state
+                            .galaxies
+                            .map((item, i) => <Galaxy data={item.data} id={item.id}/>)}
                     </div>
 
                 </div>

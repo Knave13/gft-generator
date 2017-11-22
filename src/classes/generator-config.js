@@ -1,5 +1,5 @@
-var StellarData  = require('../data/stellarData')
-var Random = require('random-js')
+import StellarData from '../data/stellarData'
+import Random from 'random-js'
 var r = new Random()
 var options = {}
 
@@ -64,4 +64,4 @@ var generatorConfig = {
     }
 }
 
-module.exports = generatorConfig
+export default generatorConfig

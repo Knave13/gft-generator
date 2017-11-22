@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import GenPlanets from '../classes/generate-planets'
 import PlanetDetails from './planetDetails'
 import DataField from './dataField'
@@ -8,7 +8,7 @@ export default class Planets extends Component {
         this.setState({"planetData": ""})
     }
 
-    render () {
+    render() {
         const divStyle = {
             'paddingTop': '10px',
             'paddingBottom': '10px',
@@ -25,11 +25,12 @@ export default class Planets extends Component {
             defaultStyle: {
                 'color': 'black'
             },
-            styles: [ {
+            styles: [
+                {
                     val: 0,
                     style: {
                         'color': 'blue'
-                    } 
+                    }
                 }, {
                     val: 50,
                     style: {
@@ -51,27 +52,34 @@ export default class Planets extends Component {
             },
             styles: []
         }
-//(this.state.planetData.orbitData.orbits[j].temperate > 100) ? {color: 'red'} : ''
+        // (this.state.planetData.orbitData.orbits[j].temperate > 100) ? {color: 'red'} :
+        // ''
         if (this.props.starData == null) {
             return (
                 <div className='container' style={divStyle}>
                     <h1>No System loaded</h1>
                 </div>
-            )    
+            )
         } else {
             console.log("state", JSON.stringify(this.state, null, 2))
             if (this.state.planetData === '') {
                 return (
                     <div>
                         <h1>No Planets Loaded</h1>
-                        <button onClick={this.addPlanets.bind(this)}>Add Planets</button>
+                        <button
+                            onClick={this
+                            .addPlanets
+                            .bind(this)}>Add Planets</button>
                     </div>
                 )
             } else {
                 let orbitData = this.state.planetData.orbitData
                 return (
                     <div className='container' style={divStyle}>
-                        <button onClick={this.addPlanets.bind(this)}>Add Planets</button>
+                        <button
+                            onClick={this
+                            .addPlanets
+                            .bind(this)}>Add Planets</button>
                         <br/>
                         <div>
                             <table className="Board" style={tableStyle}>
@@ -87,8 +95,9 @@ export default class Planets extends Component {
                                         <th>Gravity</th>
                                         <th>Moons</th>
                                     </tr>
-                                    {Array.apply(0, Array(orbitData.orbits.length)).map((x, j) =>
-                                        <tr key={j}>
+                                    {Array
+                                        .apply(0, Array(orbitData.orbits.length))
+                                        .map((x, j) => <tr key={j}>
                                             <td>
                                                 {j}
                                             </td>
@@ -105,24 +114,27 @@ export default class Planets extends Component {
                                                 {orbitData.orbits[j].details && orbitData.orbits[j].details.atmosphere}
                                             </td>
                                             <td>
-                                                <DataField options={tempOptions} data={orbitData.orbits[j].details 
-                                                    && orbitData.orbits[j].details.temperature } />
+                                                <DataField
+                                                    options={tempOptions}
+                                                    data={orbitData.orbits[j].details && orbitData.orbits[j].details.temperature}/>
                                             </td>
                                             <td>
-                                                <DataField options={numberOptions} data={orbitData.orbits[j].details
-                                                    && orbitData.orbits[j].details.physics.periodDays } />
-                                            </td>                                            
+                                                <DataField
+                                                    options={numberOptions}
+                                                    data={orbitData.orbits[j].details && orbitData.orbits[j].details.physics.periodDays}/>
+                                            </td>
                                             <td>
-                                                <DataField options={numberOptions} data={orbitData.orbits[j].details 
-                                                    && orbitData.orbits[j].details.physics.gravity } />                                            </td>                                            
+                                                <DataField
+                                                    options={numberOptions}
+                                                    data={orbitData.orbits[j].details && orbitData.orbits[j].details.physics.gravity}/>
+                                            </td>
                                             <td>
                                                 {orbitData.orbits[j].details && orbitData.orbits[j].details.moons}
                                             </td>
                                             <td>
-                                                <PlanetDetails planetData={orbitData.orbits[j]} />
+                                                <PlanetDetails planetData={orbitData.orbits[j]}/>
                                             </td>
-                                        </tr>
-                                    )}
+                                        </tr>)}
                                 </tbody>
                             </table>
                         </div>
@@ -132,7 +144,6 @@ export default class Planets extends Component {
         }
     }
 
-    
     addPlanets() {
         //console.log(JSON.stringify(this.props.starData, null, 2))
         let options = {
@@ -140,7 +151,7 @@ export default class Planets extends Component {
         }
         GenPlanets.generatePlanetaryBodies(this.props.starData, options, (planetData) => {
             //console.log(JSON.stringify(planetData, null, 2))
-            this.setState({ "planetData" : planetData })
+            this.setState({"planetData": planetData})
         })
     }
 }

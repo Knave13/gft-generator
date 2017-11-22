@@ -1,21 +1,23 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 
 export default class PlanetDetails extends Component {
     constructor(props) {
-        super(props)       
+        super(props)
     }
 
     componentWillMount() {
         this.setState({"planetData": ""})
     }
 
-    componentDidMount() {
-    }
+    componentDidMount() {}
 
-    render () {
+    render() {
         return (
             <div>
-                <button onClick={this.showPlanetDetails.bind(this)}>Details</button>
+                <button
+                    onClick={this
+                    .showPlanetDetails
+                    .bind(this)}>Details</button>
             </div>
         )
     }

@@ -1,106 +1,127 @@
-var StellarData  = require('../data/stellarData')
-var GenConfig = require('./generator-config')
-var Random = require('random-js')
+import StellarData from '../data/stellarData'
+import GenConfig from './generator-config'
+import Random from 'random-js'
 var r = new Random()
 var options = {}
 
 var generator = {
-  generateStarSystem: (galaxyId, name, optionData) => {
-    GenConfig.initConfig(optionData)
-    var nature = getSystemNature()
-    var starSystem = {}
-    var primaryStar = {}
-    var starData = getStarType(null)
-    var hasNearCompanion = false
-    var coords = {x:0,y:0,z:0}
-    var generatorDetails = {}
-    options = optionData
-
-    starSystem.galaxyId = galaxyId
-    starSystem.name = name
-    starSystem.coords = coords
-    starSystem.starCount = nature
-    starSystem.nature = StellarData.nature[nature]
-
-    starData = getPrimarySize(starData)
-    starData = validateStar(starData)
-
-    primaryStar.typeCode = starData.starType
-    primaryStar.sizeCode = starData.starSize
-    primaryStar.classification = starData.classification
-    primaryStar.starKeyCode = starData.starType + starData.classification + starData.starSize
-    primaryStar.primary = true
-    primaryStar.orbitType = StellarData.starOrbitType.Primary
-    starSystem.primaryStarKeyCode = primaryStar.typeCode + primaryStar.classification + primaryStar.sizeCode
-
-    starSystem.primaryStar = primaryStar
-    generatorDetails.starList = []
-
-    if (nature > 1) {
-        primaryStar.suffix = StellarData.latinSuffix[1]
-    }
-    generatorDetails.starList.push(primaryStar)
-    primaryStar.companions = []
-    // for a star system that is not solitary
-    for (var i=1; i<nature; i++) {
-        // these companion stars are primary companions
-        var companionStar = {}
-
-        var companionData = getStarType(primaryStar)
-        companionData = getCompanionSize(companionData, starData.sizeDM)
-        companionData = validateStar(companionData)
-
-        companionStar.typeCode = companionData.starType
-        companionStar.sizeCode = companionData.starSize
-        companionStar.classification = companionData.classification
-        companionStar.starKeyCode = companionData.starType + companionData.classification + companionData.starSize
-        companionStar.suffix = StellarData.latinSuffix[i+1]
-
-        var companionOrbit = getCompanionOrbit(companionData.orbitsDM, hasNearCompanion)
-        if (companionOrbit.orbitType === 'Near') {
-            hasNearCompanion = true
+    generateStarSystem: (galaxyId, name, optionData) => {
+        if (GenConfig.initConfig) {
+            console.log('initializing config')
+            GenConfig.initConfig(optionData)
         }
+        
+        var nature = getSystemNature()
+        var starSystem = {}
+        var primaryStar = {}
+        var starData = getStarType(null)
+        var hasNearCompanion = false
+        var coords = {
+            x: 0,
+            y: 0,
+            z: 0
+        }
+        var generatorDetails = {}
+        options = optionData
 
-        primaryStar.companions.push({ starId: companionStar._id, companionOrbit: companionOrbit.orbitType, orbit: companionOrbit.orbit})
-        starSystem.companionStars.push({
-            companionStar: companionStar,
-            companionOrbit: companionOrbit.orbitType, 
-            name: starSystem.name + ' ' + StellarData.latinSuffix[i+1],
-            isdOuterCompanion: true
-        })
-        generatorDetails.starList.push(companionStar)
+        starSystem.galaxyId = galaxyId
+        starSystem.name = name
+        starSystem.coords = coords
+        starSystem.starCount = nature
+        starSystem.nature = StellarData.nature[nature]
 
-        // if the compantion type is far, roll for an extended companion
-        if (companionOrbit.orbitType === StellarData.starOrbitType.Far) {
-            var extendedCompanion = getExtendedCompanion(companionData)
-            if (extendedCompanion) {
-            // we have an extended companion, process it
-            extendedCompanion.suffix = StellarData.latinSuffix[1 + starSystem.starCount++]
+        starData = getPrimarySize(starData)
+        starData = validateStar(starData)
 
-            companionStar.companions.push({ starId: extendedCompanion._id, companionOrbit: extendedCompanion.orbitType, orbit: extendedCompanion.orbit, isOuterCompanion: true})
-            starSystem.companionStars.push({
-                starId: extendedCompanion._id, 
-                companionType: 
-                extendedCompanion.orbitType, 
-                name: starSystem.name + ' ' + extendedCompanion.suffix,
-                companionStarType: extendedCompanion.typeCode,
-                companionStarSize: extendedCompanion.sizeCode,
-                companionStarClassification: extendedCompanion.classification,
-                isOuterCompanion: true
-            })
+        primaryStar.typeCode = starData.starType
+        primaryStar.sizeCode = starData.starSize
+        primaryStar.classification = starData.classification
+        primaryStar.starKeyCode = starData.starType + starData.classification + starData.starSize
+        primaryStar.primary = true
+        primaryStar.orbitType = StellarData.starOrbitType.Primary
+        starSystem.primaryStarKeyCode = primaryStar.typeCode + primaryStar.classification + primaryStar.sizeCode
 
-            generatorDetails.starList.push(extendedCompanion)
+        starSystem.primaryStar = primaryStar
+        generatorDetails.starList = []
+
+        if (nature > 1) {
+            primaryStar.suffix = StellarData.latinSuffix[1]
+        }
+        generatorDetails
+            .starList
+            .push(primaryStar)
+        primaryStar.companions = []
+        // for a star system that is not solitary
+        for (var i = 1; i < nature; i++) {
+            // these companion stars are primary companions
+            var companionStar = {}
+
+            var companionData = getStarType(primaryStar)
+            companionData = getCompanionSize(companionData, starData.sizeDM)
+            companionData = validateStar(companionData)
+
+            companionStar.typeCode = companionData.starType
+            companionStar.sizeCode = companionData.starSize
+            companionStar.classification = companionData.classification
+            companionStar.starKeyCode = companionData.starType + companionData.classification + companionData.starSize
+            companionStar.suffix = StellarData.latinSuffix[i + 1]
+
+            var companionOrbit = getCompanionOrbit(companionData.orbitsDM, hasNearCompanion)
+            if (companionOrbit.orbitType === 'Near') {
+                hasNearCompanion = true
+            }
+
+            primaryStar
+                .companions
+                .push({starId: companionStar._id, companionOrbit: companionOrbit.orbitType, orbit: companionOrbit.orbit})
+            starSystem
+                .companionStars
+                .push({
+                    companionStar: companionStar,
+                    companionOrbit: companionOrbit.orbitType,
+                    name: starSystem.name + ' ' + StellarData.latinSuffix[i + 1],
+                    isdOuterCompanion: true
+                })
+            generatorDetails
+                .starList
+                .push(companionStar)
+
+            // if the compantion type is far, roll for an extended companion
+            if (companionOrbit.orbitType === StellarData.starOrbitType.Far) {
+                var extendedCompanion = getExtendedCompanion(companionData)
+                if (extendedCompanion) {
+                    // we have an extended companion, process it
+                    extendedCompanion.suffix = StellarData.latinSuffix[1 + starSystem.starCount++]
+
+                    companionStar
+                        .companions
+                        .push({starId: extendedCompanion._id, companionOrbit: extendedCompanion.orbitType, orbit: extendedCompanion.orbit, isOuterCompanion: true})
+                    starSystem
+                        .companionStars
+                        .push({
+                            starId: extendedCompanion._id,
+                            companionType: extendedCompanion.orbitType,
+                            name: starSystem.name + ' ' + extendedCompanion.suffix,
+                            companionStarType: extendedCompanion.typeCode,
+                            companionStarSize: extendedCompanion.sizeCode,
+                            companionStarClassification: extendedCompanion.classification,
+                            isOuterCompanion: true
+                        })
+
+                    generatorDetails
+                        .starList
+                        .push(extendedCompanion)
+                }
             }
         }
-    }
-    generatorDetails.dateCreated = new Date()
-    generatorDetails.createdBy = 'system'
+        generatorDetails.dateCreated = new Date()
+        generatorDetails.createdBy = 'system'
 
-    starSystem.generatorDetails = generatorDetails
-    // console.log(JSON.stringify(starSystem, null, 2))
-    // console.log('Star System Genration complete')
+        starSystem.generatorDetails = generatorDetails
+        // console.log(JSON.stringify(starSystem, null, 2)) console.log('Star System
+        // Genration complete')
 
-    return starSystem
+        return starSystem
     }
 }
 
@@ -150,33 +171,23 @@ function getCompanionOrbit(orbitsDM, hasNearCompanion) {
 
 function validateStar(star) {
     // if the star is size IV and K5 to M9 then made the star size V
-    if (star.starSize === StellarData.starSize.IV &&
-        ((star.starType === StellarData.starType.K && star.classification >= 5) || star.starType === StellarData.starType.M)) {
+    if (star.starSize === StellarData.starSize.IV && ((star.starType === StellarData.starType.K && star.classification >= 5) || star.starType === StellarData.starType.M)) {
         star.starSize = StellarData.starSize.V
-    } else if (star.starSize === StellarData.starSize.VI &&
-        (star.starType === StellarData.starType.B || star.starType === StellarData.starType.A ||
-        (star.starType === StellarData.starType.F && star.classification < 5))) {
+    } else if (star.starSize === StellarData.starSize.VI && (star.starType === StellarData.starType.B || star.starType === StellarData.starType.A || (star.starType === StellarData.starType.F && star.classification < 5))) {
         star.starSize = StellarData.starSize.V
     }
 
     return star
 }
 
-// function getCoords(index, callback) {
-//   var coords
-//   Coords.find({ id: index}, function getData(err, data) {
-//     if (err) {
-//       console.log('Unable to find system coordinates for index:', index)
-//     }
-//     coords = data
-//   })
-//   process.nextTick(function () {
-//     return callback(coords)
-//   })
-// }
+// function getCoords(index, callback) {   var coords   Coords.find({ id:
+// index}, function getData(err, data) {     if (err) {
+// console.log('Unable to find system coordinates for index:', index)     }
+// coords = data   })   process.nextTick(function () {     return
+// callback(coords)   }) }
 
 function getSystemNature() {
-    if (GenConfig.getSystemNature() !== null) {
+    if (GenConfig.getSystemNature) {
         return GenConfig.getSystemNature()
     }
     console.log('should not get here')
@@ -193,6 +204,7 @@ function getSystemNature() {
 
 function getStarType(primaryType) {
     if (GenConfig.getStarType) {
+        console.log('calling config override')
         return GenConfig.getStarType(primaryType)
     }
     var roll = r.integer(1, 10000)
@@ -203,54 +215,54 @@ function getStarType(primaryType) {
         roll = roll + primaryType.typeDM
         result.typeDM = 0
         if (roll < 14) {
-        result.typeDM = 10
-        result.starType = StellarData.starType.B
+            result.typeDM = 10
+            result.starType = StellarData.starType.B
         } else if (roll < 75) {
-        result.typeDM = 60
-        result.starType = StellarData.starType.A
+            result.typeDM = 60
+            result.starType = StellarData.starType.A
         } else if (roll < 476) {
-        result.typeDM = 300
-        result.starType = StellarData.starType.F
+            result.typeDM = 300
+            result.starType = StellarData.starType.F
         } else if (roll < 1333) {
-        result.typeDM = 760
-        result.starType = StellarData.starType.G
+            result.typeDM = 760
+            result.starType = StellarData.starType.G
         } else if (roll < 2843) {
-        result.typeDM = 1010
-        result.starType = StellarData.starType.K
+            result.typeDM = 1010
+            result.starType = StellarData.starType.K
         } else {
-        result.typeDM = 5000
-        result.starType = StellarData.starType.M
+            result.typeDM = 5000
+            result.starType = StellarData.starType.M
         }
 
     } else {
         // primary star
         if (roll < 14) {
-        result.typeDM = 10
-        result.starType = StellarData.starType.B
+            result.typeDM = 10
+            result.starType = StellarData.starType.B
         } else if (roll < 53) {
-        result.typeDM = 60
-        result.starType = StellarData.starType.A
+            result.typeDM = 60
+            result.starType = StellarData.starType.A
         } else if (roll < 476) {
-        result.typeDM = 300
-        result.starType = StellarData.starType.F
+            result.typeDM = 300
+            result.starType = StellarData.starType.F
         } else if (roll < 1160) {
-        result.typeDM = 760
-        result.starType = StellarData.starType.G
+            result.typeDM = 760
+            result.starType = StellarData.starType.G
         } else if (roll < 2943) {
-        result.typeDM = 1010
-        result.starType = StellarData.starType.K
+            result.typeDM = 1010
+            result.starType = StellarData.starType.K
         } else {
-        result.typeDM = 5000
-        result.starType = StellarData.starType.M
+            result.typeDM = 5000
+            result.starType = StellarData.starType.M
         }
     }
     if (result.starType === StellarData.starType.O) {
-        result.classification = r.integer(5,9)
+        result.classification = r.integer(5, 9)
     } else {
-        result.classification = r.integer(0,9)
+        result.classification = r.integer(0, 9)
     }
-    
-    return result  
+
+    return result
 }
 
 function getPrimarySize(primaryStar) {
@@ -295,8 +307,7 @@ function getPrimarySize(primaryStar) {
         result.orbitsDM = 0
     }
 
-    if (primaryStar.starType === StellarData.starType.M ||
-        primaryStar.starType === StellarData.starType.K) {
+    if (primaryStar.starType === StellarData.starType.M || primaryStar.starType === StellarData.starType.K) {
         result.orbitsDM += -4
     }
 
@@ -307,7 +318,7 @@ function getCompanionSize(star, sizeDM) {
     var roll = twoD6()
     var subRoll = r.integer(1, 100)
     roll += sizeDM
-    
+
     var result = star
     if (roll === 2 && subRoll < 10) {
         result.sizeDM = 0

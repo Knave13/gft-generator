@@ -1,6 +1,6 @@
-var StellarData  = require('../data/stellarData')
-var GenConfig = require('./generator-config')
-var Random = require('random-js')
+import StellarData from '../data/stellarData'
+import GenConfig from './generator-config'
+import Random from 'random-js'
 var r = new Random()
 var options = {}
 
@@ -716,4 +716,4 @@ function flip() {
     return r.bool()
 }
 
-module.exports = generator
+export default generator

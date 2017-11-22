@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import StellarData from '../data/stellarData'
 import StarAstronomics from './starAstronomics'
 import Planets from './planets'
@@ -8,13 +8,11 @@ export default class StarSystem extends Component {
         super(props)
     }
 
-    componentWillMount() {
-    }
+    componentWillMount() {}
 
-    componentDidMount() {
-    }
+    componentDidMount() {}
 
-    render () {
+    render() {
         const divStyle = {
             'paddingTop': '10px',
             'paddingBottom': '10px',
@@ -40,10 +38,9 @@ export default class StarSystem extends Component {
                     <br/>
                     <div>
                         {starKey}
-                        <br/>
-                        {friendlyType}({this.props.starSystem.primaryStar.classification}) {friendlySize}
+                        <br/> {friendlyType}({this.props.starSystem.primaryStar.classification}) {friendlySize}
                     </div>
-                    <StarAstronomics astronomics={this.props.starSystem.astronomics} />
+                    <StarAstronomics astronomics={this.props.starSystem.astronomics}/>
                     <Planets starData={this.props.starSystem.primaryStar}/>
                 </div>
             )
