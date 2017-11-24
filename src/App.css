@@ -34,3 +34,12 @@
 .App>a {
     padding-right: 10px;
 }
+
+.dataTable {
+    text-align: left;
+    padding-left: 250px;
+}
+
+.dataTable td {
+    padding-right: 20px;
+}

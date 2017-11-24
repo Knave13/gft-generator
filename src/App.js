@@ -8,6 +8,7 @@ import Home from './components/home'
 import GalaxyDetails from './components/galaxyDetails'
 import GalaxyList from './components/galaxyList'
 import StarSystemList from './components/starSystemList'
+import StarSystemDetails from './components/starSystemDetails'
 
 // Initialize Firebase
 var config = {
@@ -41,6 +42,7 @@ class App extends Component {
                 </header>
                 <Router>
                     <Switch>
+                        <PropsRoute path="/galaxy/:id/starSystems/:star" component={StarSystemDetails} db={db} />
                         <PropsRoute path="/galaxy/:id/starSystems" component={StarSystemList} db={db} />
                         <PropsRoute path="/galaxy/:id" component={GalaxyDetails} db={db} />
                         <PropsRoute path="/galaxy" component={GalaxyList} db={db} />

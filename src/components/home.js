@@ -5,7 +5,7 @@ export default class Home extends Component {
     render() {
         return (
             <div className="App">
-                <Link to='/'>Home</Link>
+                <Link className='foo' to='/'>Home</Link>
                 <Link to='/galaxy'>Galaxies</Link>
                 <br/>
                 <h1>Home</h1>

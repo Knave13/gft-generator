@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom'
 import NameGen from '../classes/generate-name'
 import StarGen from '../classes/generate-starsystem'
 import Astronomics from '../data/fileAstronomics'
+import StarSystem from './starSystem'
 
 export default class StarSystemList extends Component {
     componentWillMount() {
@@ -12,15 +13,13 @@ export default class StarSystemList extends Component {
         let starSystemsRef = this.props.db.collection('starSystems')
         let galaxyRef = this.props.db.collection('galaxies').doc(this.props.match.params.id)
         let starSystems = []
-
-        console.log('getting star systems')
-        console.log('galaxyId', this.props.match.params.id)
-        starSystemsRef.where('galaxyId', '==', galaxyRef).get()
+        this.setState({galaxyRef: galaxyRef})
+        starSystemsRef.where('galaxyRef', '==', galaxyRef).get()
             .then(query => {
                 query.forEach(x => {
                     starSystems.push({
                         id: x.id,
-                        data: x.data()
+                        data: x.data().star
                     })
                 })
                 this.setState({starSystems: starSystems})
@@ -44,11 +43,24 @@ export default class StarSystemList extends Component {
                     <h1>Star System list</h1>
                     <button onClick={this.generateStarSystem.bind(this)}>New Star System</button>
                     <div>
-                        {this.state.starSystems.map((item, i) => 
-                            <div key={i}>
-                                {item.data.name}
-                            </div>    
-                        )}
+                        <table className='dataTable'>
+                            <tbody>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Lum</th>
+                                    <th>Mag</th>
+                                    <th>Mass</th>
+                                    <th>Radii</th>
+                                    <th>Temp</th>
+                                </tr>
+                                {this.state.starSystems.map((item, i) => 
+                                    <StarSystem key={i} starSystem={item} galaxy={this.props.match.params.id} />  
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )
@@ -62,12 +74,14 @@ export default class StarSystemList extends Component {
                 nature: 1
             }
             var star = StarGen.generateStarSystem(this.props.match.params.id, name, options)
-            console.log(JSON.stringify(star, null, 2))
             let astroData = Astronomics.findByKey(star.primaryStarKeyCode)
             star.astronomics = astroData
             let starSystems = this.state.starSystems
             starSystems.push({data: star})
             this.setState({starSystems: starSystems})
+
+            this.props.db.collection('starSystems').doc()
+                .set({star: star, galaxyRef: this.state.galaxyRef})
         })
     }
 }

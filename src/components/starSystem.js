@@ -1,9 +1,14 @@
 import React, {Component} from 'react'
+import {Redirect} from 'react-router-dom'
 import StellarData from '../data/stellarData'
 import StarAstronomics from './starAstronomics'
 import Planets from './planets'
 
 export default class StarSystem extends Component {
+    state = {
+        starSystem: '',
+        redirect: false
+    }
     constructor(props) {
         super(props)
     }
@@ -11,7 +16,16 @@ export default class StarSystem extends Component {
     componentWillMount() {}
 
     componentDidMount() {}
-
+                // <div className='container' style={divStyle}>
+                //     <h1>{this.props.starSystem.name}</h1>
+                //     <br/>
+                //     <div>
+                //         {starKey}
+                //         <br/> {friendlyType}({this.props.starSystem.primaryStar.classification}) {friendlySize}
+                //     </div>
+                //     <StarAstronomics astronomics={this.props.starSystem.astronomics}/>
+                //     <Planets starData={this.props.starSystem.primaryStar}/>
+                // </div>
     render() {
         const divStyle = {
             'paddingTop': '10px',
@@ -19,8 +33,13 @@ export default class StarSystem extends Component {
             'paddingLeft': '150px',
             'textAlign': 'left'
         }
-
-        if (this.props.starSystem == null) {
+        if (this.state.redirect) {
+            let url='/galaxy/' + this.props.galaxy + '/starSystems/' + this.props.starSystem.id
+            return (
+                <Redirect push to={url} />
+            )
+        } else {
+        if (this.props.starSystem == '') {
             return (
                 <div className='container' style={divStyle}>
                     <h1>No system loaded</h1>
@@ -28,23 +47,30 @@ export default class StarSystem extends Component {
             )
 
         } else {
-            let starKey = this.props.starSystem.primaryStar.typeCode + this.props.starSystem.primaryStar.classification + " " + this.props.starSystem.primaryStar.sizeCode
-            let friendlyType = StellarData.starTypeColor[this.props.starSystem.primaryStar.typeCode]
-            let friendlySize = StellarData.starSizeName[this.props.starSystem.primaryStar.sizeCode]
+            let starSystem = this.props.starSystem.data
+            let starKey = starSystem.primaryStar.typeCode + starSystem.primaryStar.classification + " " + starSystem.primaryStar.sizeCode
+            let friendlyType = StellarData.starTypeColor[starSystem.primaryStar.typeCode]
+            let friendlySize = StellarData.starSizeName[starSystem.primaryStar.sizeCode]
 
             return (
-                <div className='container' style={divStyle}>
-                    <h1>{this.props.starSystem.name}</h1>
-                    <br/>
-                    <div>
-                        {starKey}
-                        <br/> {friendlyType}({this.props.starSystem.primaryStar.classification}) {friendlySize}
-                    </div>
-                    <StarAstronomics astronomics={this.props.starSystem.astronomics}/>
-                    <Planets starData={this.props.starSystem.primaryStar}/>
-                </div>
+                <tr>
+                    <td>{starSystem.name}</td>
+                    <td>{starKey}</td>
+                    <td>{friendlyType}</td>
+                    <td>{friendlySize}</td>
+                    <td>{starSystem.astronomics.luminosity}</td>
+                    <td>{starSystem.astronomics.magnitude}</td>
+                    <td>{starSystem.astronomics.mass}</td>
+                    <td>{starSystem.astronomics.radii}</td>
+                    <td>{starSystem.astronomics.temperature}</td>
+                    <td><button onClick={this.showSystemDetails.bind(this)}>Details</button></td>
+                </tr>
             )
         }
     }
+    }
 
+    showSystemDetails() {
+        this.setState({redirect: true})
+    }
 }

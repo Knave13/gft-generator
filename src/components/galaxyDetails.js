@@ -2,6 +2,9 @@ import React, {Component} from 'react'
 import {Redirect, Link} from 'react-router-dom'
 
 export default class GalaxyDetails extends Component {
+    state = {
+
+    }
     componentWillMount() {
         this.setState({galaxyData: '', redirect: false})
     }
@@ -26,6 +29,8 @@ export default class GalaxyDetails extends Component {
                 return ( 
                     <div>
                         <Link to="/">Go Home</Link>
+                        <br/>
+                        <br/>
                         Loading Galaxy {this.props.match.params.id}
                     </div>
                 )
