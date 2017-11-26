@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import NameGen from '../classes/generate-name'
-import StarGen from '../classes/generate-starsystem'
-import Astronomics from '../data/fileAstronomics'
+import NameGen from '../../classes/generate-name'
+import StarGen from '../../classes/generate-starsystem'
+import Astronomics from '../../data/fileAstronomics'
 import StarSystem from './starSystem'
 
 export default class StarSystemList extends Component {
@@ -15,6 +15,7 @@ export default class StarSystemList extends Component {
         let starSystems = []
         this.setState({galaxyRef: galaxyRef})
         starSystemsRef.where('galaxyRef', '==', galaxyRef).get()
+            //.orderBy('name').get()
             .then(query => {
                 query.forEach(x => {
                     starSystems.push({

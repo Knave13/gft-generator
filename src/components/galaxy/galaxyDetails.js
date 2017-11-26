@@ -10,7 +10,6 @@ export default class GalaxyDetails extends Component {
     }
 
     componentDidMount() {
-        console.log(JSON.stringify(this.props.params))
         let galaxyRef = this.props.db.collection('galaxies')
         galaxyRef.doc(this.props.match.params.id).get()
             .then(g => {

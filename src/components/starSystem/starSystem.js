@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
 import {Redirect} from 'react-router-dom'
-import StellarData from '../data/stellarData'
-import StarAstronomics from './starAstronomics'
-import Planets from './planets'
+import StellarData from '../../data/stellarData'
+import StarAstronomics from '../starAstronomics'
+import Planets from '../planets'
 
 export default class StarSystem extends Component {
     state = {
