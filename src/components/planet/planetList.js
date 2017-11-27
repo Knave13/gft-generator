@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
-import GenPlanets from '../classes/generate-planets'
+import GenPlanets from '../../classes/generate-planets'
 import PlanetDetails from './planetDetails'
-import DataField from './dataField'
+import DataField from '../dataField'
 
 export default class Planets extends Component {
     componentWillMount() {
@@ -145,12 +145,10 @@ export default class Planets extends Component {
     }
 
     addPlanets() {
-        //console.log(JSON.stringify(this.props.starData, null, 2))
         let options = {
             sol: true
         }
         GenPlanets.generatePlanetaryBodies(this.props.starData, options, (planetData) => {
-            //console.log(JSON.stringify(planetData, null, 2))
             this.setState({"planetData": planetData})
         })
     }

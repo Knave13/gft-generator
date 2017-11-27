@@ -11,7 +11,7 @@ class LinkFormatter extends Component {
     render() {
         return (
             <div>
-                <Link to={this.props.value.id}>{this.props.value.name}</Link>
+                <Link to={this.props.value.id+'/planets'}>{this.props.value.name}</Link>
             </div>
         )
     }

@@ -3,10 +3,10 @@ import {Redirect, Link} from 'react-router-dom'
 
 export default class GalaxyDetails extends Component {
     state = {
-
+        galaxyData: '',
+        redirect: false
     }
     componentWillMount() {
-        this.setState({galaxyData: '', redirect: false})
     }
 
     componentDidMount() {
