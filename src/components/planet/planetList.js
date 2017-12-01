@@ -67,9 +67,7 @@ export default class Planets extends Component {
                     <div>
                         <h1>No Planets Loaded</h1>
                         <button
-                            onClick={this
-                            .addPlanets
-                            .bind(this)}>Add Planets</button>
+                            onClick={this.addPlanets.bind(this)}>Add Planets</button>
                     </div>
                 )
             } else {

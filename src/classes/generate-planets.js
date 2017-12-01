@@ -8,96 +8,104 @@ var generator = {
     generatePlanetaryBodies: (parentStar, optionData, callback) => {
         GenConfig.initConfig(optionData)
         options = optionData
+        console.log(JSON.stringify(parentStar, null, 2), JSON.stringify(optionData, null, 2))
         StellarData.stellarData(parentStar.typeCode, parentStar.classification, parentStar.sizeCode, (stellarData) => {
-            // generate an empty array of orbits, orbit count is random but must be as big as the fathest near companion star orbit
-        var maxOrbits = getMaximumOrbits(parentStar.typeCode, parentStar.sizeCode)
+            // generate an empty array of orbits, orbit count is random but must be as big
+            // as the fathest near companion star orbit
+            let maxOrbits = getMaximumOrbits(parentStar.typeCode, parentStar.sizeCode)
+ 
+            // initialize zones
+            let orbitData = initializeOrbits(stellarData.zones, maxOrbits, parentStar.companions)
+            let systemData = {
+                parentStar: parentStar,
+                stellarData: stellarData,
+                maxOrbits: maxOrbits,
+                orbitData: orbitData
+            }
+            // assign gas giants H or O
+            for (let i = 0; i < systemData.orbitData.gasGiants; i++) {
+                let orbit = pickAvailableOrbit([
+                    'H', 'O'
+                ], systemData)
+                if (options.sol) {
+                    orbit = i + 6
+                }
 
-        // initialize zones
-        var orbitData = initializeOrbits(stellarData.zones, maxOrbits, parentStar.companions)
-        var systemData = {
-            parentStar: parentStar,
-            stellarData: stellarData,
-            maxOrbits: maxOrbits,
-            orbitData: orbitData        
-        }
-        // assign gas giants H or O
-        for (let i = 0; i < systemData.orbitData.gasGiants; i++) {
-            let orbit = pickAvailableOrbit(['H', 'O'], systemData)
-            if (options.sol) {
-                orbit = i + 6
+                if (orbit !== -1) {
+                    systemData.orbitData.orbits[orbit].available = false
+                    systemData.orbitData.availableOrbits-- 
+                    systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.GasGiant
+                }
             }
 
-            if (orbit !== -1) {
-                systemData.orbitData.orbits[orbit].available = false
-                systemData.orbitData.availableOrbits--
-                systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.GasGiant
-            }
-        }
+            // assign planetoid belt inside of gas giants then random
+            for (let i = 0; i < systemData.orbitData.asteroidBelts; i++) {
+                let orbit = findAsteroidBeltInsideGasGiant(systemData)
+                if (orbit === -1) {
+                    orbit = pickAvailableOrbit([
+                        'I', 'H', 'O'
+                    ], systemData)
+                }
+                if (options.sol) {
+                    orbit = 5
+                }
 
-        // assign planetoid belt inside of gas giants then random
-        for (let i = 0; i < systemData.orbitData.asteroidBelts; i++) {
-            let orbit = findAsteroidBeltInsideGasGiant(systemData)
-            if (orbit === -1) {
-                orbit = pickAvailableOrbit(['I', 'H', 'O'], systemData)
-            }
-            if (options.sol) {
-                orbit = 5
-            }
-            
-            if (orbit !== -1) {
-                systemData.orbitData.orbits[orbit].available = false
-                systemData.orbitData.availableOrbits--
-                systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Asteroid
-            }
-        }
-
-        // empty orbits
-        for (let i = 0; i < systemData.orbitData.emptyOrbits; i++) {
-            // reduce the probablity of an empty orbit in the habitable zone
-            let zones = ['I', 'O']
-            if (r.flip) {
-                zones.push('H')
-            }
-            let orbit = pickAvailableOrbit(zones, systemData, true)
-            if (options.sol) {
-                orbit = 0
+                if (orbit !== -1) {
+                    systemData.orbitData.orbits[orbit].available = false
+                    systemData.orbitData.availableOrbits-- 
+                    systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Asteroid
+                }
             }
 
-            if (orbit !== -1) {
-                systemData.orbitData.orbits[orbit].available = false
-                systemData.orbitData.availableOrbits--
-                systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Empty
+            // empty orbits
+            for (let i = 0; i < systemData.orbitData.emptyOrbits; i++) {
+                // reduce the probablity of an empty orbit in the habitable zone
+                let zones = ['I', 'O']
+                if (r.flip) {
+                    zones.push('H')
+                }
+                let orbit = pickAvailableOrbit(zones, systemData, true)
+                if (options.sol) {
+                    orbit = 0
+                }
+
+                if (orbit !== -1) {
+                    systemData.orbitData.orbits[orbit].available = false
+                    systemData.orbitData.availableOrbits-- 
+                    systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Empty
+                }
             }
-        }
 
-        // assign camptured planets
-        for (let i = 0; i < systemData.orbitData.capturedPlanets; i++) {
-            let orbit = pickAvailableOrbit(['I', 'H', 'O'], systemData)
+            // assign camptured planets
+            for (let i = 0; i < systemData.orbitData.capturedPlanets; i++) {
+                let orbit = pickAvailableOrbit([
+                    'I', 'H', 'O'
+                ], systemData)
 
-            if (orbit !== -1) {
-                systemData.orbitData.orbits[orbit].available = false
-                systemData.orbitData.availableOrbits--
-                systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Planet
-                systemData.orbitData.orbits[orbit].orbitOffset = r.integer(0, 10) - 5 
+                if (orbit !== -1) {
+                    systemData.orbitData.orbits[orbit].available = false
+                    systemData.orbitData.availableOrbits-- 
+                    systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Planet
+                    systemData.orbitData.orbits[orbit].orbitOffset = r.integer(0, 10) - 5
+                }
             }
-        }
 
-        // assign planets
-        for (let i = 0; i < systemData.maxOrbits; i++) {
-            if (systemData.orbitData.orbits[i].available) {
-                systemData.orbitData.orbits[i].available = false
-                systemData.orbitData.availableOrbits--
-                systemData.orbitData.orbits[i].orbitType = StellarData.orbitType.Planet
+            // assign planets
+            for (let i = 0; i < systemData.maxOrbits; i++) {
+                if (systemData.orbitData.orbits[i].available) {
+                    systemData.orbitData.orbits[i].available = false
+                    systemData.orbitData.availableOrbits-- 
+                    systemData.orbitData.orbits[i].orbitType = StellarData.orbitType.Planet
+                }
             }
-        }
 
-        systemData = processOrbits(systemData)
+            systemData = processOrbits(systemData)
 
-        //console.log(JSON.stringify(systemData, null, 2))
-        callback(systemData)
+            console.log(JSON.stringify(systemData, null, 2))
+            callback(systemData)
         })
-    }, 
-    generateMoons: function(options, callback) {
+    },
+    generateMoons: function (options, callback) {
         console.log(JSON.stringify(options, null, 2))
 
         callback({error: "Not implemented"})
@@ -106,12 +114,12 @@ var generator = {
 
 function processOrbits(systemData) {
     // walk the orbit list and process each
-    for(let i = 0; i < systemData.orbitData.orbits.length; i++) {
+    for (let i = 0; i < systemData.orbitData.orbits.length; i++) {
         let orbit = systemData.orbitData.orbits[i]
         let orbitDetails = {}
         let moons = 0
 
-        switch(orbit.orbitType) {
+        switch (orbit.orbitType) {
             case StellarData.orbitType.GasGiant:
                 if (options.sol) {
                     if (i === 6) {
@@ -120,8 +128,8 @@ function processOrbits(systemData) {
                         orbitDetails.moons = 27
                         orbitDetails.temperature = 'Hot'
                         orbitDetails.physics = {
-                            periodDays : 0,
-                            gravity : 0
+                            periodDays: 0,
+                            gravity: 0
                         }
                     } else if (i === 7) {
                         orbitDetails.size = 'Large'
@@ -129,8 +137,8 @@ function processOrbits(systemData) {
                         orbitDetails.moons = 18
                         orbitDetails.temperature = 'Hot'
                         orbitDetails.physics = {
-                            periodDays : 0,
-                            gravity : 0
+                            periodDays: 0,
+                            gravity: 0
                         }
                     } else if (i === 8) {
                         orbitDetails.size = 'Small'
@@ -138,8 +146,8 @@ function processOrbits(systemData) {
                         orbitDetails.moons = 7
                         orbitDetails.temperature = 'Cold'
                         orbitDetails.physics = {
-                            periodDays : 0,
-                            gravity : 0
+                            periodDays: 0,
+                            gravity: 0
                         }
                     } else if (i === 9) {
                         orbitDetails.size = 'Small'
@@ -147,8 +155,8 @@ function processOrbits(systemData) {
                         orbitDetails.moons = 4
                         orbitDetails.temperature = 'Cold'
                         orbitDetails.physics = {
-                            periodDays : 0,
-                            gravity : 0
+                            periodDays: 0,
+                            gravity: 0
                         }
                     }
                 } else {
@@ -156,28 +164,31 @@ function processOrbits(systemData) {
                         orbitDetails.size = 'Large'
                         orbitDetails.radius = r.integer(60, 200) * 1000
                         moons = twoD6()
-                    }
-                    else {
-                    orbitDetails.size = 'Small'
-                    orbitDetails.radius = r.integer(20, 60) * 1000
-                    moons = twoD6() - 4
-                    moons = moons < 0 ? 0 : moons
+                    } else {
+                        orbitDetails.size = 'Small'
+                        orbitDetails.radius = r.integer(20, 60) * 1000
+                        moons = twoD6() - 4
+                        moons = moons < 0
+                            ? 0
+                            : moons
                     }
                     orbitDetails.moons = moons
                     orbitDetails.rings = 'TBD'
-                    orbitDetails.temperature = flip() ? 'Hot' : 'Cold'
+                    orbitDetails.temperature = flip()
+                        ? 'Hot'
+                        : 'Cold'
                     orbitDetails.physics = {
-                        periodDays : 0,
-                        gravity : 0
+                        periodDays: 0,
+                        gravity: 0
                     }
-        }
+                }
                 systemData.orbitData.orbits[i].details = orbitDetails
-            break
+                break
 
             case StellarData.orbitType.Planet:
                 var planetDetails = generatePlanetDetails(i, systemData.orbitData.orbits[i].orbitZoneCode, systemData.parentStar, systemData.stellarData)
                 systemData.orbitData.orbits[i].details = planetDetails
-            break
+                break
         }
     }
     //console.log(JSON.stringify(systemData, null, 2))
@@ -204,14 +215,15 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
         planetDetails.hydropgraphics = 'None'
         planetDetails.hydroPercentage = 0
         density = 1.0 + r.integer(-2, 2) / 10
-    }
-    else {
+    } else {
         let moons = d6() - 3
         let atmo = twoD6() - 7 + roll + modifiers.atmoMod
-        atmo = atmo < 0 ? 0 : atmo
+        atmo = atmo < 0
+            ? 0
+            : atmo
         planetDetails.size = roll
         planetDetails.radius = roll * 1600 + r.integer(-10, 10) * 80 // 1600 * size +/- 800 in km
-        
+
         if (options.sol) {
             if (orbit === 1) {
                 moons = 0
@@ -232,7 +244,9 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
             }
         }
 
-        planetDetails.moons = moons > 0 ? moons : 'None'
+        planetDetails.moons = moons > 0
+            ? moons
+            : 'None'
         planetDetails.rings = 'None'
         planetDetails.atmosphere = StellarData.atmospheres[atmo]
         planetDetails.atmoCode = atmo
@@ -242,11 +256,16 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
         if (roll === 1) {
             planetDetails.hydrographics = 'None'
             planetDetails.hydroPercentage = 0
-        }
-        else {
-            let atmoMod = atmo <= 1 || atmo >= 10 ? -4 : 0
+        } else {
+            let atmoMod = atmo <= 1 || atmo >= 10
+                ? -4
+                : 0
             let hydroRoll = twoD6() - 7 + modifiers.hydroMod + roll + atmoMod
-            hydroRoll = hydroRoll < 0 ? 0 : (hydroRoll > 10 ? 10 : hydroRoll)
+            hydroRoll = hydroRoll < 0
+                ? 0
+                : (hydroRoll > 10
+                    ? 10
+                    : hydroRoll)
             if (options.sol) {
                 if (orbit === 3) {
                     hydroRoll = 7
@@ -254,7 +273,9 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
                     hydroRoll = 0
                 }
             }
-            planetDetails.hydrographics = hydroRoll === 0 ? 'None' : (hydroRoll * 10) + '%'
+            planetDetails.hydrographics = hydroRoll === 0
+                ? 'None'
+                : (hydroRoll * 10) + '%'
             planetDetails.hydroPercentage = hydroRoll * 10
         }
         if (options.sol) {
@@ -263,7 +284,7 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
             } else if (orbit === 2) {
                 density = 0.945
             } else if (orbit === 3) {
-            density = 1.0
+                density = 1.0
             } else if (orbit === 4) {
                 density = 0.709
             }
@@ -288,11 +309,9 @@ function generatePlanetModifiers(orbit, zoneCode, starData) {
 
     if (orbit === 0) {
         sizeMod -= 5
-    }
-    else if (orbit === 1) {
+    } else if (orbit === 1) {
         sizeMod -= 4
-    }
-    else if (orbit === 2) {
+    } else if (orbit === 2) {
         sizeMod -= 2
     }
 
@@ -303,12 +322,10 @@ function generatePlanetModifiers(orbit, zoneCode, starData) {
     if (zoneCode === 'I') {
         atmoMod -= 2
         hydroMod -= 99 // hydro is guaranteed to be 0 in the Inner zones
-    }
-    else if (zoneCode === 'O') {
+    } else if (zoneCode === 'O') {
         atmoMod -= 4
         hydroMod -= 4
-    } 
-    else {
+    } else {
         atmoMod = 0
         hydroMod = 0
     }
@@ -327,13 +344,12 @@ function pickAvailableOrbit(filter, systemData, includeEmpty) {
     for (let i = 0; i < systemData.maxOrbits; i++) {
         // empty orbits can use existing Empty orbits
         if (systemData.orbitData.orbits[i].available || (useEmpty && systemData.orbitData.orbits[i].orbitType === StellarData.orbitType.Empty)) {
-            count++
+            count++ 
             if (count === orbit) {
                 if (findInArray(systemData.orbitData.orbits[i].orbitZoneCode, filter)) {
-                return i
-                }
-                else {
-                count--
+                    return i
+                } else {
+                    count--
                 }
             }
         }
@@ -343,12 +359,11 @@ function pickAvailableOrbit(filter, systemData, includeEmpty) {
 }
 
 function findAsteroidBeltInsideGasGiant(systemData) {
-    // place the asteroid belt inside a gas giant starting from the sun and moving outware
-    // no need to look at orbit 0 since nothing can be inside of that orbit
+    // place the asteroid belt inside a gas giant starting from the sun and moving
+    // outware no need to look at orbit 0 since nothing can be inside of that orbit
     for (let i = 1; i < systemData.maxOrbits; i++) {
-        if (systemData.orbitData.orbits[i].orbitType === "GasGiant" &&
-            systemData.orbitData.orbits[i - 1].available) {
-        return i
+        if (systemData.orbitData.orbits[i].orbitType === "GasGiant" && systemData.orbitData.orbits[i - 1].available) {
+            return i
         }
     }
 
@@ -358,7 +373,7 @@ function findAsteroidBeltInsideGasGiant(systemData) {
 function findInArray(val, array) {
     for (let i = 0; i < array.length; i++) {
         if (array[i] === val) {
-        return true
+            return true
         }
     }
     return false
@@ -392,17 +407,23 @@ function calculateTemperature(orbit, luminosity, greenhouse, albedo) {
 function calculateAlbedo(orbit, luminosity, planetData) {
     var data = {}
     var surface = {}
-    
-    data.cloudiness = StellarData.cloudiness[planetData.hydroPercentage.toString()]
+
+    data.cloudiness = StellarData.cloudiness[
+        planetData
+            .hydroPercentage
+            .toString()
+    ]
     if (planetData.atmoCode === 14) {
         data.cloudiness /= 2
-    }
-    else if (planetData.atmoCode >= 10) {
+    } else if (planetData.atmoCode >= 10) {
         data.cloudiness += 40
-        data.cloudiness = data.cloudiness > 100 ? 100 : data.cloudiness
-    }
-    else if (planetData.atmoCode <= 3) {
-        data.cloudiness = data.cloudiness > 20 ? 20 : data.cloudiness
+        data.cloudiness = data.cloudiness > 100
+            ? 100
+            : data.cloudiness
+    } else if (planetData.atmoCode <= 3) {
+        data.cloudiness = data.cloudiness > 20
+            ? 20
+            : data.cloudiness
     }
     data.cloudiness = data.cloudiness / 100
     data.cloudMod = 1.0 - data.cloudiness
@@ -413,30 +434,24 @@ function calculateAlbedo(orbit, luminosity, planetData) {
     if (planetData.hydroPercentage > 0) {
         surface.water = planetData.hydroPercentage / 100.0
         surface.ice = surface.land * 0.1
-    }
-    else {
+    } else {
         surface.water = 0.0
         surface.ice = 0.0
     }
     surface.land -= surface.ice / 2.0
     surface.water -= surface.ice / 2.0
-    surface.tectonic = r.integer(0, 30)/ 100.0 // percentage of the land that is mountanous
+    surface.tectonic = r.integer(0, 30) / 100.0 // percentage of the land that is mountanous
     surface.mountains = surface.land * surface.tectonic
     surface.desert = (surface.land - surface.mountains) * surface.desertMod
     surface.veldt = surface.land - surface.mountains - surface.desert
     surface.checksum = surface.water + surface.ice + surface.mountains + surface.desert + surface.veldt
-    data.albedo = (data.cloudiness * StellarData.albedo["Clouds"])
-                + (surface.veldt * data.cloudMod * StellarData.albedo["Veldt"])
-                + (surface.mountains * data.cloudMod * StellarData.albedo["Mountain"])
-                + (surface.desert * data.cloudMod * StellarData.albedo["Desert"])
-                + (surface.ice * data.cloudMod * StellarData.albedo["Clouds"])
-                + (surface.water * data.cloudMod * StellarData.albedo["Ice"])
+    data.albedo = (data.cloudiness * StellarData.albedo["Clouds"]) + (surface.veldt * data.cloudMod * StellarData.albedo["Veldt"]) + (surface.mountains * data.cloudMod * StellarData.albedo["Mountain"]) + (surface.desert * data.cloudMod * StellarData.albedo["Desert"]) + (surface.ice * data.cloudMod * StellarData.albedo["Clouds"]) + (surface.water * data.cloudMod * StellarData.albedo["Ice"])
     // console.log((data.cloudiness * StellarData.albedo["Clouds"]),
-    //             (surface.veldt * data.cloudMod * StellarData.albedo["Veldt"]),
-    //             (surface.mountains * data.cloudMod * StellarData.albedo["Mountain"]),
-    //             (surface.desert * data.cloudMod * StellarData.albedo["Desert"]),
-    //             (surface.ice * data.cloudMod * StellarData.albedo["Clouds"]),
-    //             (surface.water * data.cloudMod * StellarData.albedo["Ice"]))
+    // (surface.veldt * data.cloudMod * StellarData.albedo["Veldt"]),
+    // (surface.mountains * data.cloudMod * StellarData.albedo["Mountain"]),
+    //     (surface.desert * data.cloudMod * StellarData.albedo["Desert"]),
+    //    (surface.ice * data.cloudMod * StellarData.albedo["Clouds"]),
+    // (surface.water * data.cloudMod * StellarData.albedo["Ice"]))
 
     data.surface = surface
 
@@ -444,16 +459,15 @@ function calculateAlbedo(orbit, luminosity, planetData) {
 }
 
 function calculateGreenhouse(atmoCode) {
-    // calculate the greenhouse effect based on the specified atmosphere code
-    // Result is a percentage increase +100%, 1.0 - 1.7
-    //console.log('AtmoCode', atmoCode, 'greenhouse', StellarData.greenhouse[atmoCode])
+    // calculate the greenhouse effect based on the specified atmosphere code Result
+    // is a percentage increase +100%, 1.0 - 1.7 console.log('AtmoCode', atmoCode,
+    // 'greenhouse', StellarData.greenhouse[atmoCode])
     var greenhouse = StellarData.greenhouse[atmoCode]
     if (atmoCode === 10) {
         greenhouse += r.integer(10, 60)
-    }
-    else if (atmoCode === 11 || atmoCode === 12) {
+    } else if (atmoCode === 11 || atmoCode === 12) {
         greenhouse += r.integer(20, 120)
-    } 
+    }
     greenhouse += 100
 
     return greenhouse / 100.0
@@ -468,47 +482,41 @@ function initializeOrbits(zones, maxOrbits, companions) {
         let zone = zoneArray[i] || 'O'
         if (zone === 'x' || zone === '-') {
             orbits.push({orbit: i, orbitZone: "Unavailable", orbitZoneCode: "U", available: false, orbitType: StellarData.orbitType.Unavailable})
-        } 
-        else if (zone === 'I') {
+        } else if (zone === 'I') {
             orbits.push({orbit: i, orbitZone: "Inner", orbitZoneCode: "I", available: true})
-        } 
-        else if (zone === 'H') {
+        } else if (zone === 'H') {
             orbits.push({orbit: i, orbitZone: "Habitable", orbitZoneCode: "H", available: true})
-        } 
-        else if (zone === 'O') {
+        } else if (zone === 'O') {
             orbits.push({orbit: i, orbitZone: "Outer", orbitZoneCode: "O", available: true})
         }
     }
 
-    // we need to find a place for each of the near companions
-    // all orbits between the companion star orbit and half the orbits inside of the star
-    // are unavailable. Two orbits outside of the companion must be marked as unavailable
+    // we need to find a place for each of the near companions all orbits between
+    // the companion star orbit and half the orbits inside of the star are
+    // unavailable. Two orbits outside of the companion must be marked as unavailable
     for (let i = 0; i < companions.length; i++) {
-        if (companions[i].companionOrbit === 'Near' ||
-            companions[i].companionOrbit === 'Near Extended') {
+        if (companions[i].companionOrbit === 'Near' || companions[i].companionOrbit === 'Near Extended') {
             let companionOrbit = companions[i].orbit
-            //console.log('we have a near companion to play with, original maxOrbits', maxOrbits)
+            // console.log('we have a near companion to play with, original maxOrbits',
+            // maxOrbits)
             if (companionOrbit >= orbits.length) {
                 for (let j = orbits.length; j <= companionOrbit; j++) {
                     let zone = zoneArray[j] || 'O'
                     if (zone === 'x' || zone === '-') {
                         orbits.push({orbit: j, orbitZone: "Unavailable", available: false, orbitType: StellarData.orbitType.Empty})
-                    } 
-                    else if (zone === 'I') {
+                    } else if (zone === 'I') {
                         orbits.push({orbit: j, orbitZone: "Inner", available: false, orbitType: StellarData.orbitType.Empty})
-                    } 
-                    else if (zone === 'H') {
+                    } else if (zone === 'H') {
                         orbits.push({orbit: j, orbitZone: "Habitable", available: false, orbitType: StellarData.orbitType.Empty})
-                    } 
-                    else if (zone === 'O') {
+                    } else if (zone === 'O') {
                         orbits.push({orbit: j, orbitZone: "Outer", available: false, orbitType: StellarData.orbitType.Empty})
                     }
                 }
             }
 
-            // the orbits collections should not include room for the companion star
-            // we need to clear out the inside and outside orbits, as well as place
-            // the star at it's assigned orbit
+            // the orbits collections should not include room for the companion star we need
+            // to clear out the inside and outside orbits, as well as place the star at it's
+            // assigned orbit
             orbits[companionOrbit].available = false
             orbits[companionOrbit].orbitType = StellarData.orbitType.Star
             if (orbits[companionOrbit + 1]) {
@@ -526,7 +534,7 @@ function initializeOrbits(zones, maxOrbits, companions) {
                 orbits[j].available = false
                 orbits[j].orbitType = StellarData.orbitType.Empty
             }
-        }    
+        }
     }
 
     let availableCount = 0
@@ -539,7 +547,7 @@ function initializeOrbits(zones, maxOrbits, companions) {
 
     orbitData.finalOrbits = orbits.length
     orbitData.orbits = orbits
-    
+
     return orbitData
 }
 
@@ -549,7 +557,7 @@ function getSystemProperties(maxOrbits, availableOrbits) {
     output.maxOrbits = maxOrbits
     output.availableOrbits = availableOrbits
     output.remainingOrbits = availableOrbits
-    
+
     output.gasGiants = getGasGiants(output)
     output.remainingOrbits = output.remainingOrbits - output.gasGiants
 
@@ -565,7 +573,8 @@ function getSystemProperties(maxOrbits, availableOrbits) {
     return output
 }
 
-function getMaximumOrbits (starType, starSize) {
+function getMaximumOrbits(starType, starSize) {
+    console.log(starType, starSize)
     let roll = twoD6()
     if (options.sol) {
         return 10
@@ -573,9 +582,7 @@ function getMaximumOrbits (starType, starSize) {
 
     if (starSize === StellarData.starSize.III) {
         roll += 4
-    } else if (starSize === StellarData.starSize.Ia ||
-                starSize === StellarData.starSize.Ib ||
-                starSize === StellarData.starSize.II) {
+    } else if (starSize === StellarData.starSize.Ia || starSize === StellarData.starSize.Ib || starSize === StellarData.starSize.II) {
         roll += 8
     }
     if (starType === StellarData.starType.M) {
@@ -590,7 +597,7 @@ function getMaximumOrbits (starType, starSize) {
     return roll
 }
 
-function getEmptyOrbits (systemData) {
+function getEmptyOrbits(systemData) {
     let roll = d6()
     let result = 0
     if (options.sol) {
@@ -600,24 +607,23 @@ function getEmptyOrbits (systemData) {
     if (roll > 4) {
         roll = d6()
         if (roll > 3) {
-        result = 3
+            result = 3
+        } else if (roll > 2) {
+            result = 2
+        } else {
+            result = 1
         }
-        else if (roll > 2) {
-        result = 2
-        }
-        else {
-        result = 1
-        }
-        //console.log('Empty Orbits:', result, 'Remaining Orbits:', systemData.remainingOrbits)
+        // console.log('Empty Orbits:', result, 'Remaining Orbits:',
+        // systemData.remainingOrbits)
     }
     if (result > systemData.remainingOrbits) {
         result = systemData.remainingOrbits
     }
-    
+
     return result
 }
 
-function getCapturedPlanets (systemData) {
+function getCapturedPlanets(systemData) {
     let roll = d6()
     let result = 0
     if (options.sol) {
@@ -628,13 +634,11 @@ function getCapturedPlanets (systemData) {
         roll = d6()
 
         if (roll > 4) {
-        result = 3
-        }
-        else if (roll > 2) {
-        result = 2
-        }
-        else {
-        result = 1
+            result = 3
+        } else if (roll > 2) {
+            result = 2
+        } else {
+            result = 1
         }
     }
     if (result > systemData.remainingOrbits) {
@@ -644,7 +648,7 @@ function getCapturedPlanets (systemData) {
     return result
 }
 
-function getGasGiants (systemData) {
+function getGasGiants(systemData) {
     let roll = twoD6()
     let result = 0
     if (options.sol) {
@@ -655,19 +659,15 @@ function getGasGiants (systemData) {
         roll = twoD6()
 
         if (roll > 10) {
-        result = 5
-        }
-        else if (roll > 7) {
-        result = 4
-        }
-        else if (roll > 5) {
-        result = 3
-        }
-        else if (roll > 3) {
-        result = 2
-        }
-        else {
-        result = 1
+            result = 5
+        } else if (roll > 7) {
+            result = 4
+        } else if (roll > 5) {
+            result = 3
+        } else if (roll > 3) {
+            result = 2
+        } else {
+            result = 1
         }
     }
     if (result > systemData.remainingOrbits) {
@@ -677,7 +677,7 @@ function getGasGiants (systemData) {
     return result
 }
 
-function getAsteroidBelts (systemData) {
+function getAsteroidBelts(systemData) {
     let roll = twoD6() - systemData.gasGiants
     let result = 0
     if (options.sol) {
@@ -688,19 +688,17 @@ function getAsteroidBelts (systemData) {
         roll = twoD6()
 
         if (roll > 6) {
-        result = 1
-        }
-        else if (roll > 0) {
-        result = 2
-        }
-        else {
-        result = 1
+            result = 1
+        } else if (roll > 0) {
+            result = 2
+        } else {
+            result = 1
         }
     }
     if (result > systemData.remainingOrbits) {
         result = systemData.remainingOrbits
     }
-    
+
     return result
 }
 

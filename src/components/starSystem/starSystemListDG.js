@@ -60,6 +60,9 @@ export default class StarSystemListDG extends Component {
     }
 
     render() {
+        const divStyle = {
+            width: '1000px'
+        }
         if (this.state.starSystems === '') {
             return (
                 <div>
@@ -71,7 +74,7 @@ export default class StarSystemListDG extends Component {
             )
         } else {
             return (
-                <div>
+                <div style={divStyle}>
                     <Link to="/">Go Home</Link>
                     <h1>Star System list</h1>
                     <button onClick={this.generateStarSystem.bind(this)}>New Star System</button>

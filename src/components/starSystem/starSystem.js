@@ -46,7 +46,7 @@ export default class StarSystem extends Component {
             )
 
         } else {
-            let starSystem = this.props.starSystem.data
+            let starSystem = this.props.starSystem
             let starKey = starSystem.primaryStar.typeCode + starSystem.primaryStar.classification + " " + starSystem.primaryStar.sizeCode
             let friendlyType = StellarData.starTypeColor[starSystem.primaryStar.typeCode]
             let friendlySize = StellarData.starSizeName[starSystem.primaryStar.sizeCode]
@@ -62,7 +62,6 @@ export default class StarSystem extends Component {
                     <td>{starSystem.astronomics.mass}</td>
                     <td>{starSystem.astronomics.radii}</td>
                     <td>{starSystem.astronomics.temperature}</td>
-                    <td><button onClick={this.showSystemDetails.bind(this)}>Details</button></td>
                 </tr>
             )
         }

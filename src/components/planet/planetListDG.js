@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
 import ReactDataGrid from 'react-data-grid'
 import GenPlanets from '../../classes/generate-planets'
+import {StarSystem} from '../starSystem/index'
 
 class LinkFormatter extends Component {
     render() {
@@ -16,7 +17,7 @@ class LinkFormatter extends Component {
 export default class PlanetListDG extends Component {
     state = {
         planetDataLoaded: false,
-        starSysytemName: '',
+        systemData: '',
         planets: [],
         planetCount: 0
     }
@@ -56,27 +57,35 @@ export default class PlanetListDG extends Component {
                         planets.push(this.mapPlanetsToDataGrid(x.id, x.data()))
                     })
                     this.setState({
-                        starSystem: starSystemRef,
                         planets: planets,
                         planetCount: query.size,
                         planetDataLoaded: true
                     })
                 }
             })
+        starSystemRef.get()
+            .then(s => {
+                console.log(JSON.stringify(s.data().star, null, 2))
+                this.setState({systemData: s.data().star})
+            })
     }
 
     render() {
+        var systemDetails = this.displaySystemDetails()
         if (!this.state.planetDataLoaded) {
             return (
                 <div>
                     <h1>No Planet Data Loaded</h1>
                     <br/>
+                    {systemDetails}
                     <button onClick={this.generatePlanets.bind(this)}>Generate Planets</button>
                 </div>
             )
         } else {
             return (
                 <div>
+                    {systemDetails}
+                    <br />
                     <ReactDataGrid
                         columns={this._columns} 
                         rowGetter={this.rowGetter} 
@@ -87,15 +96,44 @@ export default class PlanetListDG extends Component {
         }
     }
 
+    displaySystemDetails(props) {
+        if (this.state.systemData == '') {
+            return <h1>Loading System Details</h1>
+        } else {
+            return (
+                <div>
+                    <h1>{this.state.systemData.name}</h1>
+                    <div>
+                        <table className='dataTable'>
+                            <tbody>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Lum</th>
+                                    <th>Mag</th>
+                                    <th>Mass</th>
+                                    <th>Radii</th>
+                                    <th>Temp</th>
+                                </tr>
+                                <StarSystem key={this.props.match.params.star} starSystem={this.state.systemData} galaxy={this.props.match.params.id} />
+                            </tbody>
+                        </table>
+                    </div>
+                </div>)
+        }
+    }
+
     generatePlanets() {
-        // let options = {
-        //     sol: false
-        // }
-        // GenPlanets.generatePlanetaryBodies(this.props.starData, options, (planetData) => {
-        //     this.setState({"planetData": planetData})
-        // }).then(data => {
-        //     console.log(JSON.stringify(data, null, 2))
-        // })     
+        let options = {
+            sol: false
+        }
+
+        GenPlanets.generatePlanetaryBodies(this.state.systemData.primaryStar, options, (planetData) => {
+            this.setState({"planetData": planetData})
+            console.log(JSON.stringify(planetData, null, 2))
+        })   
     }
 
     mapStarToDataGrid(id, planetData) {
