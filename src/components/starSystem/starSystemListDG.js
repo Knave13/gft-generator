@@ -5,13 +5,13 @@ import NameGen from '../../classes/generate-name'
 import StarGen from '../../classes/generate-starsystem'
 import Astronomics from '../../data/fileAstronomics'
 import StellarData from '../../data/stellarData'
-import StarSystem from './starSystem'
+import Menu from '../menu'
 
 class LinkFormatter extends Component {
     render() {
         return (
             <div>
-                <Link to={this.props.value.id+'/planets'}>{this.props.value.name}</Link>
+                <Link to={'starSystems/'+this.props.value.id+'/planets'}>{this.props.value.name}</Link>
             </div>
         )
     }
@@ -22,6 +22,7 @@ export default class StarSystemListDG extends Component {
         starSystems: [],
         starCount: 0
     }
+
     constructor(props) {
         super(props)
         this._columns = [
@@ -60,13 +61,23 @@ export default class StarSystemListDG extends Component {
     }
 
     render() {
+        let menus = [
+            {
+                url: '/',
+                name: 'Home'
+            },
+            {
+                url: '/galaxy',
+                name: 'Galaxies'
+            }
+        ]
         const divStyle = {
             width: '1000px'
         }
         if (this.state.starSystems === '') {
             return (
                 <div>
-                    <Link to="/">Go Home</Link>
+                    <Menu menus={menus} />
                     <h1>Star System list</h1>
                     <br/>
                     Loading...
@@ -75,7 +86,7 @@ export default class StarSystemListDG extends Component {
         } else {
             return (
                 <div style={divStyle}>
-                    <Link to="/">Go Home</Link>
+                    <Menu menus={menus} />
                     <h1>Star System list</h1>
                     <button onClick={this.generateStarSystem.bind(this)}>New Star System</button>
                     <div className='indentDiv4'>

@@ -8,12 +8,10 @@ var generator = {
     generatePlanetaryBodies: (parentStar, optionData, callback) => {
         GenConfig.initConfig(optionData)
         options = optionData
-        console.log(JSON.stringify(parentStar, null, 2), JSON.stringify(optionData, null, 2))
         StellarData.stellarData(parentStar.typeCode, parentStar.classification, parentStar.sizeCode, (stellarData) => {
             // generate an empty array of orbits, orbit count is random but must be as big
             // as the fathest near companion star orbit
             let maxOrbits = getMaximumOrbits(parentStar.typeCode, parentStar.sizeCode)
- 
             // initialize zones
             let orbitData = initializeOrbits(stellarData.zones, maxOrbits, parentStar.companions)
             let systemData = {
@@ -37,7 +35,6 @@ var generator = {
                     systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.GasGiant
                 }
             }
-
             // assign planetoid belt inside of gas giants then random
             for (let i = 0; i < systemData.orbitData.asteroidBelts; i++) {
                 let orbit = findAsteroidBeltInsideGasGiant(systemData)
@@ -105,10 +102,17 @@ var generator = {
             callback(systemData)
         })
     },
-    generateMoons: function (options, callback) {
-        console.log(JSON.stringify(options, null, 2))
+    generateMoons: function (planetData, optionData, callback) {
+        let data = {}
+        let stellarData = planetData.stellarData
+        let parentStar = planetData.parentStar
+        for (var i = 0; i < planetData.orbitData.orbits.length; i++) {
+            let planet = planetData.orbitData.orbits[i]
+        }
 
-        callback({error: "Not implemented"})
+        console.log(JSON.stringify(planetData, null, 2))
+
+        callback(planetData)
     }
 }
 
@@ -189,9 +193,10 @@ function processOrbits(systemData) {
                 var planetDetails = generatePlanetDetails(i, systemData.orbitData.orbits[i].orbitZoneCode, systemData.parentStar, systemData.stellarData)
                 systemData.orbitData.orbits[i].details = planetDetails
                 break
+            default:
+
         }
     }
-    //console.log(JSON.stringify(systemData, null, 2))
     return systemData
 }
 
@@ -574,7 +579,6 @@ function getSystemProperties(maxOrbits, availableOrbits) {
 }
 
 function getMaximumOrbits(starType, starSize) {
-    console.log(starType, starSize)
     let roll = twoD6()
     if (options.sol) {
         return 10

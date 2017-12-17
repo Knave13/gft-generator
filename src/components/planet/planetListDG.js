@@ -3,12 +3,40 @@ import {Link} from 'react-router-dom'
 import ReactDataGrid from 'react-data-grid'
 import GenPlanets from '../../classes/generate-planets'
 import {StarSystem} from '../starSystem/index'
+import Menu from '../menu'
 
 class LinkFormatter extends Component {
     render() {
+        let url = this.props.value.orbit ? this.props.value.orbit : "1"
         return (
             <div>
-                <Link to={this.props.value.id}>{this.props.value.name}</Link>
+                <Link to={url}>{this.props.value.name}</Link>
+            </div>
+        )
+    }
+}
+
+class FloatingPointFormatter extends Component {
+    render() {
+        let value = this.props.value
+        let output = ''
+        if (isNaN(value) || value === '') {
+            output = ''
+        } else {
+            let precision = 4
+            if (value <= -10) {
+                precision = 4
+            } else if (value < 1) {
+                precision = 3
+            }
+            output = Number(value).toPrecision(precision)
+        } 
+        const cellStyle = {
+            textAlign: 'center'
+        }
+        return (
+            <div style={cellStyle}>
+                {output}
             </div>
         )
     }
@@ -24,81 +52,148 @@ export default class PlanetListDG extends Component {
     constructor(props) {
         super(props)
         this._columns = [
-            { key: 'link', name: 'Name', sortable: true, formatter: LinkFormatter, cellClass: 'cellLeft', width: 150 },
-            { key: 'orbit', name: 'Orbit', sortable: true, cellClass: 'cellLeft', width: 80 },
-            { key: 'zone', name: 'Zone', sortable: true, cellClass: 'cellLeft', width: 100 },
-            { key: 'planetType', name: 'Type', sortable: true, cellClass: 'cellLeft', width: 150 },
-            { key: 'radius', name: 'Radius', cellClass: 'cellLeft', width: 100 },
-            { key: 'atmosphere', name: 'Atmo', cellClass: 'cellLeft', width: 100 },
-            { key: 'temperature', name: 'Temp', cellClass: 'cellLeft', width: 100 },
-            { key: 'period', name: 'Period', cellClass: 'cellLeft', width: 100 },
-            { key: 'gravity', name: 'Gravity', cellClass: 'cellLeft', width: 100 },
-            { key: 'moons', name: 'Moons', cellClass: 'cellLeft', width: 100 }
+
+            {
+                key: 'orbit',
+                name: 'Orbit',
+                cellClass: 'cellCenter',
+                width: 60
+            }, {
+                key: 'name',
+                name: 'Name',
+                cellClass: 'cellLeft',
+                //formatter: LinkFormatter,
+                width: 120
+            }, {
+                key: 'zone',
+                name: 'Zone',
+                cellClass: 'cellLeft',
+                width: 100
+            }, {
+                key: 'planetType',
+                name: 'Type',
+                cellClass: 'cellLeft',
+                width: 120
+            }, {
+                key: 'radius',
+                name: 'Radius',
+                cellClass: 'cellRight',
+                width: 80
+            }, {
+                key: 'atmosphere',
+                name: 'Atmo',
+                cellClass: 'cellLeft',
+                width: 150
+            }, {
+                key: 'temperature',
+                name: 'Temp',
+                cellClass: 'cellRight',
+                formatter: FloatingPointFormatter,
+                width: 90
+            }, {
+                key: 'period',
+                name: 'Period',
+                cellClass: 'cellRight',
+                formatter: FloatingPointFormatter,
+                width: 90
+            }, {
+                key: 'gravity',
+                name: 'Gravity',
+                cellClass: 'cellRight',
+                formatter: FloatingPointFormatter,
+                width: 90
+            }, {
+                key: 'moons',
+                name: 'Moons',
+                cellClass: 'cellRight',
+                width: 60
+            }
         ]
     }
 
-    componentWillMount() {
-    }
+    componentWillMount() {}
 
     componentDidMount() {
         let starSystemRef = this.props.db.collection('starSystems').doc(this.props.match.params.star)
         let galaxyRef = this.props.db.collection('galaxies').doc(this.props.match.params.id)
-        let planetsRef = this.props.db.collection('planets') 
+        let planetsRef = this.props.db.collection('planets')
         let planets = []
-        this.setState({
-            galaxyRef: galaxyRef,
-            starSystemRef: starSystemRef
-        })
-        planetsRef.where('starSystemRef', '==', starSystemRef).get()
-            //.orderBy('name').get()
-            .then(query => {
-                if (query.size > 0) {
-                    query.forEach(x => {
-                        planets.push(this.mapPlanetsToDataGrid(x.id, x.data()))
-                    })
-                    this.setState({
-                        planets: planets,
-                        planetCount: query.size,
-                        planetDataLoaded: true
-                    })
-                }
-            })
+        this.setState({galaxyRef: galaxyRef, starSystemRef: starSystemRef})
         starSystemRef.get()
             .then(s => {
-                console.log(JSON.stringify(s.data().star, null, 2))
-                this.setState({systemData: s.data().star})
+                this.setState({
+                    systemData: s.data().star
+                })
+
+                planetsRef.doc(this.props.match.params.star).get()
+                    .then(query => {
+                        if (query.exists) {
+                            let planetData = query.data()
+                            for (let i = 0; i < planetData.planets.orbitData.orbits.length; i++) {
+                                planets.push(this.mapPlanetsToDataGrid(this.state.systemData.name + ' ' + i, planetData.planets.orbitData.orbits[i]))
+                            }
+                            this.setState({planets: planets, planetCount: planets.length, planetDataLoaded: true})
+                        }
+                    })
             })
     }
 
     render() {
+        let menus = [
+            {
+                url: '/',
+                name: 'Home'
+            },
+            {
+                url: '/galaxy',
+                name: 'Galaxies'
+            },
+            {
+                url: '/galaxy/' + this.props.match.params.id + '/starSystems',
+                name: 'Star Systems'
+            }
+        ]
+        const divStyle = {
+            width: '1050px'
+        }
         var systemDetails = this.displaySystemDetails()
         if (!this.state.planetDataLoaded) {
             return (
                 <div>
+                    <Menu menus={menus} />
                     <h1>No Planet Data Loaded</h1>
-                    <br/>
-                    {systemDetails}
-                    <button onClick={this.generatePlanets.bind(this)}>Generate Planets</button>
+                    <br/> {systemDetails}
+                    <button
+                        onClick={this
+                        .generatePlanets
+                        .bind(this)}>Generate Planets</button>
                 </div>
             )
         } else {
             return (
-                <div>
+                <div style={divStyle}>
+                    
                     {systemDetails}
-                    <br />
-                    <ReactDataGrid
-                        columns={this._columns} 
-                        rowGetter={this.rowGetter} 
-                        rowsCount={this.state.planetCount} 
-                        minHeight={500} />
+                    <br/>
+                    <div className='indentDiv4'>
+                        <ReactDataGrid
+                            columns={this._columns}
+                            rowGetter={this.rowGetter}
+                            rowsCount={this.state.planetCount}
+                            minHeight={500}/>
+                    </div>
                 </div>
             )
         }
     }
 
     displaySystemDetails(props) {
-        if (this.state.systemData == '') {
-            return <h1>Loading System Details</h1>
+        if (this.state.systemData === '') {
+            return (
+                <div>
+                    <h1>Loading System Details</h1>
+                </div>
+            )
         } else {
             return (
                 <div>
@@ -117,11 +212,15 @@ export default class PlanetListDG extends Component {
                                     <th>Radii</th>
                                     <th>Temp</th>
                                 </tr>
-                                <StarSystem key={this.props.match.params.star} starSystem={this.state.systemData} galaxy={this.props.match.params.id} />
+                                <StarSystem
+                                    key={this.props.match.params.star}
+                                    starSystem={this.state.systemData}
+                                    galaxy={this.props.match.params.id}/>
                             </tbody>
                         </table>
                     </div>
-                </div>)
+                </div>
+            )
         }
     }
 
@@ -129,17 +228,44 @@ export default class PlanetListDG extends Component {
         let options = {
             sol: false
         }
+        let planets = []
+        GenPlanets.generatePlanetaryBodies(this.state.systemData.primaryStar, options, (rawPlanetData) => {
+            GenPlanets.generateMoons(this.state.systemData.primaryStar, rawPlanetData, options, (planetData) => {
+                let name = this.state.systemData.name
 
-        GenPlanets.generatePlanetaryBodies(this.state.systemData.primaryStar, options, (planetData) => {
-            this.setState({"planetData": planetData})
-            console.log(JSON.stringify(planetData, null, 2))
-        })   
+                this.setState({'planetData': planetData})
+                this.props.db.collection('planets')
+                    .doc(this.props.match.params.star)
+                    .set({planets: planetData})
+                    .then(ref => {
+                        console.log(JSON.stringify(planetData, null, 2))
+                        for (let i = 0; i < planetData.orbitData.orbits.length; i++) {
+                            planets.push(this.mapPlanetsToDataGrid(name + ' ' + i, planetData.orbitData.orbits[i]))
+                        }
+    
+                        this.setState({planets: planets, planetCount: planets.length, planetDataLoaded: true})
+                    })
+            })
+
+        })
     }
 
-    mapStarToDataGrid(id, planetData) {
+    mapPlanetsToDataGrid(name, planetData) {
+        //console.log(JSON.stringify(planetData, null, 2))
         let planet = {
-            id: id,
-            name: this.state.starSystemName
+            id: this.props.match.params.star,
+            name: name,
+            orbit: planetData.orbit,
+            zone: planetData.orbitZone,
+            planetType: planetData.orbitType
+        }
+        if (planetData.details) {
+            planet.radius = planetData.details.radius
+            planet.atmosphere = planetData.details.atmosphere
+            planet.temperature = planetData.details.temperature
+            planet.period = planetData.details.physics.period
+            planet.gravity = planetData.details.physics.gravity
+            planet.moons = planetData.details.moons
         }
 
         return planet

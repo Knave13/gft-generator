@@ -1,12 +1,17 @@
 import React, {Component} from 'react'
-import {Link} from 'react-router-dom'
+import Menu from './menu'
 
 export default class Home extends Component {
     render() {
+        let menus = [
+            {
+                url: '/galaxy',
+                name: 'Go Home'
+            }
+        ]
         return (
             <div className="App">
-                <Link className='foo' to='/'>Home</Link>
-                <Link to='/galaxy'>Galaxies</Link>
+                <Menu menus={menus} />
                 <br/>
                 <h1>Home</h1>
             </div>

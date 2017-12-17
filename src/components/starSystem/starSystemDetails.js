@@ -19,20 +19,21 @@ export default class StarSystemDetails extends Component {
     }
 
     render() {
-        if (this.state.systemData == '') {
-            <div>
+        if (this.state.systemData === '') {
+            return (<div>
                 <h1>Star System Details</h1>
                 <br/>
                 Loading...
-            </div>
+            </div>)
+        } else {
+            return (
+                <div>
+                    <h1>Star System Details</h1>
+                    <br/>
+                    <button onClick={this.generatePlanets.bind(this)}>Generate Planets</button>
+                </div>
+            )
         }
-        return (
-            <div>
-                <h1>Star System Details</h1>
-                <br/>
-                <button onClick={this.generatePlanets.bind(this)}>Generate Planets</button>
-            </div>
-        )
     }
 
     generatePlanets() {

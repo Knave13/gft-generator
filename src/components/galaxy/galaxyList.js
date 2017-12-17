@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
-import {Link} from 'react-router-dom'
 import Galaxy from './galaxy'
+import Menu from '../menu'
 
 export default class GalaxyList extends Component {
     componentWillMount() {
@@ -38,10 +38,16 @@ export default class GalaxyList extends Component {
     }
 
     render() {
+        let menus = [
+            {
+                url: '/',
+                name: 'Home'
+            }
+        ]
         if (this.state.galaxies === '') {
             return (
                 <div>
-                    <Link to="/">Go Home</Link>
+                    <Menu menus={menus} />
                     <h1>Galaxy list</h1>
                     <br/>
                     Loading...
@@ -50,11 +56,16 @@ export default class GalaxyList extends Component {
         } else {
             return (
                 <div>
-                    <Link to="/">Go Home</Link>
+                    <Menu menus={menus} />
                     <h1>Galaxy list</h1>
                     <div>
                         <table className='dataTable'>
                             <tbody>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>System Count</th>
+                                    <th>Active</th>
+                                </tr>
                                 {this.state.galaxies.map((item, i) => 
                                     <Galaxy key={item.id} data={item.data} starCount={this.state.counts[i]} id={item.id}/>)}
                             </tbody>

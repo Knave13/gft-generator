@@ -281,7 +281,7 @@ var stellarData = {
     stellarData: (typeCode, classification, sizeCode, callback) => {
         var key = typeCode + classification + sizeCode
         var data = getStellarDataByKey(key)
-        return data
+        callback(data)
     },
     stellarSize: (size, callback) => {
         callback(StarSize[size])

@@ -1,15 +1,11 @@
 import React, {Component} from 'react'
 import {Redirect} from 'react-router-dom'
 import StellarData from '../../data/stellarData'
-import StarAstronomics from '../starAstronomics'
 
 export default class StarSystem extends Component {
     state = {
         starSystem: '',
         redirect: false
-    }
-    constructor(props) {
-        super(props)
     }
 
     componentWillMount() {}
@@ -38,7 +34,7 @@ export default class StarSystem extends Component {
                 <Redirect push to={url} />
             )
         } else {
-        if (this.props.starSystem == '') {
+        if (this.props.starSystem === '') {
             return (
                 <div className='container' style={divStyle}>
                     <h1>No system loaded</h1>

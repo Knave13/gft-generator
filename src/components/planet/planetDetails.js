@@ -1,10 +1,6 @@
 import React, {Component} from 'react'
 
 export default class PlanetDetails extends Component {
-    constructor(props) {
-        super(props)
-    }
-
     componentWillMount() {
         this.setState({"planetData": ""})
     }
