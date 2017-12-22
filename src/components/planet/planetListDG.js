@@ -7,10 +7,9 @@ import Menu from '../menu'
 
 class LinkFormatter extends Component {
     render() {
-        let url = this.props.value.orbit ? this.props.value.orbit : "1"
         return (
             <div>
-                <Link to={url}>{this.props.value.name}</Link>
+            <Link to={'planets/'+this.props.value.orbit}>{this.props.value.name}</Link>
             </div>
         )
     }
@@ -59,10 +58,10 @@ export default class PlanetListDG extends Component {
                 cellClass: 'cellCenter',
                 width: 60
             }, {
-                key: 'name',
+                key: 'link',
                 name: 'Name',
                 cellClass: 'cellLeft',
-                //formatter: LinkFormatter,
+                formatter: LinkFormatter,
                 width: 120
             }, {
                 key: 'zone',
@@ -240,6 +239,7 @@ export default class PlanetListDG extends Component {
                     .then(ref => {
                         for (let i = 0; i < planetData.maxOrbits; i++) {
                             planets.push(this.mapPlanetsToDataGrid(planetData.orbitData.orbits[i]))
+                            //for (let j = 0; j < planetData)
                         }
                         this.setState({planets: planets, planetCount: planets.length, planetDataLoaded: true})
                     })
@@ -251,8 +251,13 @@ export default class PlanetListDG extends Component {
     mapPlanetsToDataGrid(planetData) {
         console.log(JSON.stringify(planetData, null, 2))
         let planet = {
-            id: this.props.match.params.star,
+            id: planetData.id,
             name: planetData.name,
+            link: {
+                star: this.state.systemData.id,
+                orbit: planetData.orbit,
+                name: planetData.name
+            },
             orbit: planetData.orbit,
             zone: planetData.orbitZone,
             planetType: planetData.orbitType

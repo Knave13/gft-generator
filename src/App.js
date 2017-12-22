@@ -6,7 +6,7 @@ import 'firebase/firestore'
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
 import Home from './components/home'
 import GalaxyList, {GalaxyDetails} from './components/galaxy/index'
-import PlanetList from './components/planet/index'
+import PlanetList, {PlanetDetails} from './components/planet/index'
 import StarSystemListDG, {StarSystemDetails} from './components/starSystem/index'
 
 // Initialize Firebase
@@ -41,6 +41,7 @@ class App extends Component {
                 </header>
                 <Router>
                     <Switch>
+                        <PropsRoute path="/galaxy/:id/starSystems/:star/planets/:orbit" component={PlanetDetails} db={db} />
                         <PropsRoute path="/galaxy/:id/starSystems/:star/planets" component={PlanetList} db={db} />
                         <PropsRoute path="/galaxy/:id/starSystems/:star" component={StarSystemDetails} db={db} />
                         <PropsRoute path="/galaxy/:id/starSystems" component={StarSystemListDG} db={db} />
