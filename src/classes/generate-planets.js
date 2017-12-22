@@ -148,6 +148,7 @@ var generator = {
                     } else {
                         moonData.size = size * 1600 + r.integer(-10, 10) * 80
                     }
+                    // TODO: add the modifier for Inner planets, reduce the atmo by 4
                     let atmo= twoD6() - 7 + (size > 0 ? size : 0)
                     if (size <= 0) {
                         atmo = 0
