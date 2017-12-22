@@ -5,7 +5,7 @@ var r = new Random()
 var options = {}
 
 var generator = {
-    generatePlanetaryBodies: (parentStar, optionData, callback) => {
+    generatePlanetaryBodies: (name, parentStar, optionData, callback) => {
         GenConfig.initConfig(optionData)
         options = optionData
         StellarData.stellarData(parentStar.typeCode, parentStar.classification, parentStar.sizeCode, (stellarData) => {
@@ -96,105 +96,177 @@ var generator = {
                 }
             }
 
-            systemData = processOrbits(systemData)
+            // this should get called after the gas giants and planetary details are generated
+            // need numbers not text for things like orbits, atmo, moons, rings, etc.
+            systemData = generatePlanetaryBodyDetails(name, systemData)
 
-            console.log(JSON.stringify(systemData, null, 2))
             callback(systemData)
         })
     },
     generateMoons: function (planetData, optionData, callback) {
-        let data = {}
         let stellarData = planetData.stellarData
         let parentStar = planetData.parentStar
-        for (var i = 0; i < planetData.orbitData.orbits.length; i++) {
+        for (let i = 0; i < planetData.maxOrbits; i++) {
             let planet = planetData.orbitData.orbits[i]
-        }
+            let moonChar = 'a'
+            let moonCollection = []
+            if (planet.orbitType === StellarData.orbitType.Planet) {
+                for (let j = 0; j < planet.details.moons; j++) {
+                    let moonData = {
+                        name: planet.name + ' ' + moonChar
+                    }
+                    let size = planet.details.size - d6();
+                    if (size < 0) {
+                        moonData.size = 'Small'
+                        // Small
+                    } else if (size === 0) {
+                        moonData.size = 'Ring'
+                    } else {
+                        moonData.size = size * 1600 + r.integer(-10, 10) * 80
+                    }
+                    let atmo= twoD6() - 7 + (size > 0 ? size : 0)
+                    if (size <= 0) {
+                        atmo = 0
+                    }
+                    moonData.atmosphere = StellarData.atmospheres[atmo]
+                    moonData.atmoCode = atmo
+                    
+                    moonCollection.push(moonData)
+                    moonChar = nextChar(moonChar)
+                }
+            } else if (planet.orbitType === StellarData.orbitType.GasGiant) {
+                for (var j = 0; j < planet.details.moons; j++) {
+                    let moonData = {
+                        name: planet.name + ' ' + moonChar
+                    }
+                    let size = twoD6() - 3
+                    if (size < 0) {
+                        moonData.size = 'Small'
+                        // Small
+                    } else if (size === 0) {
+                        moonData.size = 'Ring'
+                    } else {
+                        moonData.size = size * 1600 + r.integer(-10, 10) * 80
+                    }
+                    let atmo= twoD6() - 7 + (size > 0 ? size : 0)
+                    if (size <= 0) {
+                        atmo = 0
+                    }
+                    moonData.atmosphere = StellarData.atmospheres[atmo]
+                    moonData.atmoCode = atmo
 
-        console.log(JSON.stringify(planetData, null, 2))
+                    moonCollection.push(moonData)
+                    moonChar = nextChar(moonChar)
+                }
+            }
+            if (moonCollection.length > 0) {
+                planetData.orbitData.orbits[i].moons = moonCollection
+            }
+        }
 
         callback(planetData)
     }
 }
 
-function processOrbits(systemData) {
+function generatePlanetaryBodyDetails(name, systemData) {
+    let beltCount = 'A'
+    let planetCount = 0
     // walk the orbit list and process each
     for (let i = 0; i < systemData.orbitData.orbits.length; i++) {
         let orbit = systemData.orbitData.orbits[i]
-        let orbitDetails = {}
+        let details = {}
         let moons = 0
 
         switch (orbit.orbitType) {
             case StellarData.orbitType.GasGiant:
+                planetCount++
                 if (options.sol) {
                     if (i === 6) {
-                        orbitDetails.size = 'Large'
-                        orbitDetails.radius = 69911
-                        orbitDetails.moons = 27
-                        orbitDetails.temperature = 'Hot'
-                        orbitDetails.physics = {
+                        details.size = 'Large'
+                        details.radius = 69911
+                        details.moons = 27
+                        details.temperature = 'Hot'
+                        details.physics = {
                             periodDays: 0,
                             gravity: 0
                         }
                     } else if (i === 7) {
-                        orbitDetails.size = 'Large'
-                        orbitDetails.radius = 58232
-                        orbitDetails.moons = 18
-                        orbitDetails.temperature = 'Hot'
-                        orbitDetails.physics = {
+                        details.size = 'Large'
+                        details.radius = 58232
+                        details.moons = 18
+                        details.temperature = 'Hot'
+                        details.physics = {
                             periodDays: 0,
                             gravity: 0
                         }
                     } else if (i === 8) {
-                        orbitDetails.size = 'Small'
-                        orbitDetails.radius = 24622
-                        orbitDetails.moons = 7
-                        orbitDetails.temperature = 'Cold'
-                        orbitDetails.physics = {
+                        details.size = 'Small'
+                        details.radius = 24622
+                        details.moons = 7
+                        details.temperature = 'Cold'
+                        details.physics = {
                             periodDays: 0,
                             gravity: 0
                         }
                     } else if (i === 9) {
-                        orbitDetails.size = 'Small'
-                        orbitDetails.radius = 25362
-                        orbitDetails.moons = 4
-                        orbitDetails.temperature = 'Cold'
-                        orbitDetails.physics = {
+                        details.size = 'Small'
+                        details.radius = 25362
+                        details.moons = 4
+                        details.temperature = 'Cold'
+                        details.physics = {
                             periodDays: 0,
                             gravity: 0
                         }
                     }
                 } else {
                     if (flip()) {
-                        orbitDetails.size = 'Large'
-                        orbitDetails.radius = r.integer(60, 200) * 1000
-                        moons = twoD6()
+                        details.size = 'Large'
+                        details.radius = r.integer(60, 200) * 1000
+                        moons = twoD6() + 5
                     } else {
-                        orbitDetails.size = 'Small'
-                        orbitDetails.radius = r.integer(20, 60) * 1000
-                        moons = twoD6() - 4
-                        moons = moons < 0
-                            ? 0
-                            : moons
+                        details.size = 'Small'
+                        details.radius = r.integer(20, 60) * 1000
+                        moons = twoD6()
                     }
-                    orbitDetails.moons = moons
-                    orbitDetails.rings = 'TBD'
-                    orbitDetails.temperature = flip()
+                    details.moons = moons < 1 ? 0 : moons
+                    details.rings = 0
+                    details.temperature = flip()
                         ? 'Hot'
                         : 'Cold'
-                    orbitDetails.physics = {
+                        details.physics = {
                         periodDays: 0,
                         gravity: 0
                     }
                 }
-                systemData.orbitData.orbits[i].details = orbitDetails
+                systemData.orbitData.orbits[i].name = name + ' ' + planetCount
+                systemData.orbitData.orbits[i].details = details
                 break
 
             case StellarData.orbitType.Planet:
-                var planetDetails = generatePlanetDetails(i, systemData.orbitData.orbits[i].orbitZoneCode, systemData.parentStar, systemData.stellarData)
-                systemData.orbitData.orbits[i].details = planetDetails
+            case StellarData.orbitType.Planetoid:
+                planetCount++
+                details = generatePlanetDetails(i, systemData.orbitData.orbits[i].orbitZoneCode, systemData.parentStar, systemData.stellarData)
+                systemData.orbitData.orbits[i].name = name + ' ' + planetCount
+                systemData.orbitData.orbits[i].details = details
                 break
+            
+            case StellarData.orbitType.Asteroid:
+                // details = {
+                //     name: name + ' Belt ' + beltCount,
+                //     minerals: flip() ? 'Rich' : 'Carbonacious',
+                //     density: flip() ? 'Dense' : 'Light'
+                // }
+                systemData.orbitData.orbits[i].name = name + ' Belt ' + beltCount
+                beltCount = nextChar(beltCount)
+                //systemData.orbitData.orbits[i].details = details
+                break
+            
             default:
-
+                // details = {
+                //     name: ''
+                // }
+                systemData.orbitData.orbits[i].name = ''
+                //systemData.orbitData.orbits[i].details = details
         }
     }
     return systemData
@@ -213,8 +285,8 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
     if (roll <= 0) {
         planetDetails.size = "Small"
         planetDetails.radius = r.integer(150, 250)
-        planetDetails.moons = 'None'
-        planetDetails.rings = 'None'
+        planetDetails.moons = 0
+        planetDetails.rings = 0
         planetDetails.atmosphere = StellarData.atmospheres[0]
         planetDetails.atmoCode = 0
         planetDetails.hydropgraphics = 'None'
@@ -222,6 +294,9 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
         density = 1.0 + r.integer(-2, 2) / 10
     } else {
         let moons = d6() - 3
+        if (roll >= 10) {
+            moons += 3
+        }
         let atmo = twoD6() - 7 + roll + modifiers.atmoMod
         atmo = atmo < 0
             ? 0
@@ -249,10 +324,8 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
             }
         }
 
-        planetDetails.moons = moons > 0
-            ? moons
-            : 'None'
-        planetDetails.rings = 'None'
+        planetDetails.moons = moons < 1 ? 0 : moons
+        planetDetails.rings = 0
         planetDetails.atmosphere = StellarData.atmospheres[atmo]
         planetDetails.atmoCode = atmo
         if (atmo === 2 || atmo === 4 || atmo === 7 || atmo === 9) {
@@ -301,7 +374,6 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
     planetDetails.physics = calculatePlanetaryDetails(planetDetails.radius, orbit, density, stellarData.mass, 0)
     planetDetails.albedoData = calculateAlbedo(orbit, stellarData.luminosity, planetDetails)
     planetDetails.temperature = calculateTemperature(orbit, stellarData.luminosity, planetDetails.albedoData.greenhouse, planetDetails.albedoData.albedo)
-    //console.log(JSON.stringify(planetDetails, null, 2))
 
     return planetDetails
 }
@@ -382,6 +454,10 @@ function findInArray(val, array) {
         }
     }
     return false
+}
+
+function nextChar(c) {
+    return String.fromCharCode(c.charCodeAt(0) + 1);
 }
 
 function calculatePlanetaryDetails(radius, orbit, density, stellarMass, orbitalOffset) {
