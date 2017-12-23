@@ -7,11 +7,22 @@ import Menu from '../menu'
 
 class LinkFormatter extends Component {
     render() {
-        return (
-            <div>
-            <Link to={'planets/'+this.props.value.orbit}>{this.props.value.name}</Link>
-            </div>
-        )
+        if (this.props.value.valid) {
+            return (
+                <div>
+                    <Link to={'planets/'+this.props.value.orbit}>{this.props.value.name}</Link>
+                </div>
+            )
+        } else {
+            const divStyle = {
+                paddingLeft: '10px'
+            }
+            return (
+                <div style={divStyle}>
+                    {this.props.value.name}
+                </div>
+            )
+        }
     }
 }
 
@@ -135,9 +146,9 @@ export default class PlanetListDG extends Component {
                             for (let i = 0; i < planetData.planets.maxOrbits; i++) {
                                 planets.push(this.mapPlanetsToDataGrid(planetData.planets.orbitData.orbits[i]))
                                 if (planetData.planets.orbitData.orbits[i].details
-                                    && planetData.planets.orbitData.orbits[i].details.moons
-                                    && planetData.planets.orbitData.orbits[i].details.moons > 0) {
-                                    for (let j = 0; j < planetData.planets.orbitData.orbits[i].details.moons; j++) {
+                                    && planetData.planets.orbitData.orbits[i].details.moonCount
+                                    && planetData.planets.orbitData.orbits[i].details.moonCount > 0) {
+                                    for (let j = 0; j < planetData.planets.orbitData.orbits[i].details.moonCount; j++) {
                                         planets.push(this.mapMoonsToDataGrid(planetData.planets.orbitData.orbits[i].moons[j]))
                                     }
                                     //planets.push(this.mapMoopnsToDataGrid)
@@ -275,7 +286,8 @@ export default class PlanetListDG extends Component {
             link: {
                 star: this.state.systemData.id,
                 orbit: orbit,
-                name: moonData.name
+                name: moonData.name,
+                valid: false
             },
             orbit: '',
             zone: '',
@@ -299,7 +311,8 @@ export default class PlanetListDG extends Component {
             link: {
                 star: this.state.systemData.id,
                 orbit: planetData.orbit,
-                name: planetData.name
+                name: planetData.name,
+                valid: true
             },
             orbit: planetData.orbit,
             zone: planetData.orbitZone,
@@ -311,7 +324,7 @@ export default class PlanetListDG extends Component {
             planet.temperature = planetData.details.temperature
             planet.period = planetData.details.physics.period
             planet.gravity = planetData.details.physics.gravity
-            planet.moons = planetData.details.moonCount
+            planet.moons = planetData.details.moonCount > 0 ? planetData.details.moonCount : 'None'
         }
 
         return planet

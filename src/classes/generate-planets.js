@@ -122,16 +122,18 @@ var generator = {
                 hydroModifier = -4
             }
             if (planet.details && planet.details.moonCount) {
+                let orbitCollection = {}
                 for (let j = 0; j < planet.details.moonCount; j++) {
                     let size = 0
                     let moonData = {
                         name: planet.name + moonChar
                     }
-
+                    let isGasGiant = false
                     // Size
                     if (planet.orbitType === StellarData.orbitType.Planet) {
                         size = planet.details.size - d6()
                     } else if (planet.orbitType === StellarData.orbitType.GasGiant) {
+                        isGasGiant = true
                         if (planet.details.size === 'Small') {
                             size = twoD6() - 6
                         } else {
@@ -141,13 +143,20 @@ var generator = {
                     if (size < 0) {
                         moonData.size = 'Small'
                         moonData.radius = r.integer(150, 250)
+                        moonData.orbit = getAvailableSatelliteOrbit(orbitCollection, isGasGiant)
+                        orbitCollection[moonData.orbit] = j
                     } else if (size === 0) {
                         moonData.size = 'Ring'
                         moonData.radius = r.integer(150, 250)
+                        planetData.orbitData.orbits[i].ringCount++
+                        moonData.orbit = planetData.orbitData.orbits[i].ringCount
+                        orbitCollection[moonData.orbit] = j
                     } else {
                         moonData.size = size * 1600 + r.integer(-10, 10) * 80
                         sizeModifier = size
                         moonData.radius = size * 1600 + r.integer(-10, 10) * 80
+                        moonData.orbit = getAvailableSatelliteOrbit(orbitCollection, isGasGiant)
+                        orbitCollection[moonData.orbit] = j
                     }
                     // Atmosphere
                     let atmo= twoD6() - 7 + (size > 0 ? size : 0) + atmoModifier
@@ -182,10 +191,34 @@ var generator = {
                 }
             }
         }
-        // console.log('=================================')
-        // console.log(JSON.stringify(planetData, null, 2))
         callback(planetData)
     }
+}
+
+function getAvailableSatelliteOrbit(orbitCollection, isGasGiant) {
+    let valid = false
+    let orbit = ''
+
+    while (!valid) {
+        let distanceRoll = twoD6()
+        let orbitRoll = twoD6()
+
+        if (distanceRoll < 8) {
+            // close (4 to )
+            orbit = (orbitRoll + 2) + ''
+        } else if (distanceRoll > 11 && isGasGiant) {
+            // far
+            orbit = (orbitRoll * 5 + 5) + ''
+        } else {
+            // extreme
+            orbit = (orbitRoll * 25 + 25) + ''
+        }
+        if (!orbitCollection[orbit]) {
+            valid = true
+        }
+    }
+
+    return orbit
 }
 
 function generatePlanetaryBodyDetails(name, systemData) {
@@ -249,7 +282,7 @@ function generatePlanetaryBodyDetails(name, systemData) {
                         moons = twoD6()
                     }
                     details.moonCount = moons < 1 ? 0 : moons
-                    details.rings = 0
+                    details.ringCount = 0
                     details.temperature = flip()
                         ? 'Hot'
                         : 'Cold'
@@ -345,7 +378,7 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
         }
 
         planetDetails.moonCount = moons < 1 ? 0 : moons
-        planetDetails.rings = 0
+        planetDetails.ringCount = 0
         planetDetails.atmosphere = StellarData.atmospheres[atmo]
         planetDetails.atmoCode = atmo
         if (atmo === 2 || atmo === 4 || atmo === 7 || atmo === 9) {
@@ -493,6 +526,24 @@ function calculatePlanetaryDetails(radius, orbit, density, stellarMass, orbitalO
         "escapeVelocidy": gravity * 11.208,
         "period": Math.sqrt(Math.pow(orbitalDistance, 3) / stellarMass),
         "periodDays": Math.sqrt(Math.pow(orbitalDistance, 3) / stellarMass) * StellarData.stellarPeriodConstant
+    }
+
+    return data
+}
+
+function calculateMoonDetails(radius, orbit, density, planetRadius, planetMass, orbitalOffset) {
+    var orbitalDistance = orbit * planetRadius
+    var gravity = (density * Math.pow(radius / StellarData.stellarRadiusConstant, 3)) * ((StellarData.stellarRadiusConstant * StellarData.stellarRadiusConstant) / (radius * radius))
+    var data = {
+        "radius": radius,
+        "density": density,
+        "volume": Math.pow(radius / StellarData.stellarRadiusConstant, 3),
+        "mass": density * Math.pow(radius / StellarData.stellarRadiusConstant, 3),
+        "area": Math.pow(radius / StellarData.stellarRadiusConstant, 2),
+        "gravity": gravity,
+        "escapeVelocidy": gravity * 11.208,
+        "period": Math.sqrt(Math.pow(orbitalDistance, 3) / planetMass),
+        "periodDays": Math.sqrt(Math.pow(orbitalDistance, 3) / planetMass) * StellarData.stellarPeriodConstant
     }
 
     return data
