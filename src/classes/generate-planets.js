@@ -110,61 +110,80 @@ var generator = {
             let planet = planetData.orbitData.orbits[i]
             let moonChar = 'a'
             let moonCollection = []
-            if (planet.orbitType === StellarData.orbitType.Planet) {
-                for (let j = 0; j < planet.details.moons; j++) {
-                    let moonData = {
-                        name: planet.name + ' ' + moonChar
-                    }
-                    let size = planet.details.size - d6();
-                    if (size < 0) {
-                        moonData.size = 'Small'
-                        // Small
-                    } else if (size === 0) {
-                        moonData.size = 'Ring'
-                    } else {
-                        moonData.size = size * 1600 + r.integer(-10, 10) * 80
-                    }
-                    let atmo= twoD6() - 7 + (size > 0 ? size : 0)
-                    if (size <= 0) {
-                        atmo = 0
-                    }
-                    moonData.atmosphere = StellarData.atmospheres[atmo]
-                    moonData.atmoCode = atmo
-                    
-                    moonCollection.push(moonData)
-                    moonChar = nextChar(moonChar)
-                }
-            } else if (planet.orbitType === StellarData.orbitType.GasGiant) {
-                for (var j = 0; j < planet.details.moons; j++) {
-                    let moonData = {
-                        name: planet.name + ' ' + moonChar
-                    }
-                    let size = twoD6() - 3
-                    if (size < 0) {
-                        moonData.size = 'Small'
-                        // Small
-                    } else if (size === 0) {
-                        moonData.size = 'Ring'
-                    } else {
-                        moonData.size = size * 1600 + r.integer(-10, 10) * 80
-                    }
-                    // TODO: add the modifier for Inner planets, reduce the atmo by 4
-                    let atmo= twoD6() - 7 + (size > 0 ? size : 0)
-                    if (size <= 0) {
-                        atmo = 0
-                    }
-                    moonData.atmosphere = StellarData.atmospheres[atmo]
-                    moonData.atmoCode = atmo
-
-                    moonCollection.push(moonData)
-                    moonChar = nextChar(moonChar)
-                }
+            let zoneCode = stellarData.zones[i]
+            let sizeModifier = 0
+            let atmoModifier = 0
+            let hydroModifier = 0
+            if (zoneCode === 'I') {
+                atmoModifier = -4
+                hydroModifier = -2
+            } else if (zoneCode === 'O') {
+                atmoModifier = -4
+                hydroModifier = -4
             }
-            if (moonCollection.length > 0) {
-                planetData.orbitData.orbits[i].moons = moonCollection
+            if (planet.details && planet.details.moonCount) {
+                for (let j = 0; j < planet.details.moonCount; j++) {
+                    let size = 0
+                    let moonData = {
+                        name: planet.name + moonChar
+                    }
+
+                    // Size
+                    if (planet.orbitType === StellarData.orbitType.Planet) {
+                        size = planet.details.size - d6()
+                    } else if (planet.orbitType === StellarData.orbitType.GasGiant) {
+                        if (planet.details.size === 'Small') {
+                            size = twoD6() - 6
+                        } else {
+                            size = twoD6() - 4
+                        }
+                    }
+                    if (size < 0) {
+                        moonData.size = 'Small'
+                        moonData.radius = r.integer(150, 250)
+                    } else if (size === 0) {
+                        moonData.size = 'Ring'
+                        moonData.radius = r.integer(150, 250)
+                    } else {
+                        moonData.size = size * 1600 + r.integer(-10, 10) * 80
+                        sizeModifier = size
+                        moonData.radius = size * 1600 + r.integer(-10, 10) * 80
+                    }
+                    // Atmosphere
+                    let atmo= twoD6() - 7 + (size > 0 ? size : 0) + atmoModifier
+                    if (size <= 0 || atmo < 0) {
+                        atmo = 0
+                    }
+                    moonData.atmosphere = StellarData.atmospheres[atmo]
+                    moonData.atmoCode = atmo
+                    // Hydrographics
+                    let hydro = twoD6() - 7 + sizeModifier + hydroModifier
+                    if (size < 1) {
+                        hydro = 0
+                    } else if (size == 1 || size >= 10) {
+                        hydro += -4
+                    }
+                    if (hydro < 0) {
+                        hydro = 0
+                    }
+                    moonData.hydroPercentage = hydro * 10
+                    moonData.hydrographics = hydro == 0 ? 'None' : moonData.hydroPercentage + '%'
+                    moonData.density = 1.0 + r.integer(-20, 20) / 100
+
+                    moonData.physics = calculatePlanetaryDetails(moonData.radius, i, moonData.density, stellarData.mass, 0)
+                    moonData.albedoData = calculateAlbedo(i, stellarData.luminosity, moonData)
+                    moonData.temperature = calculateTemperature(i, stellarData.luminosity, moonData.albedoData.greenhouse, moonData.albedoData.albedo)
+                
+                    moonCollection.push(moonData)
+                    moonChar = nextChar(moonChar)
+                }
+                if (moonCollection.length > 0) {
+                    planetData.orbitData.orbits[i].moons = moonCollection
+                }
             }
         }
-
+        // console.log('=================================')
+        // console.log(JSON.stringify(planetData, null, 2))
         callback(planetData)
     }
 }
@@ -185,7 +204,7 @@ function generatePlanetaryBodyDetails(name, systemData) {
                     if (i === 6) {
                         details.size = 'Large'
                         details.radius = 69911
-                        details.moons = 27
+                        details.moonCount = 27
                         details.temperature = 'Hot'
                         details.physics = {
                             periodDays: 0,
@@ -194,7 +213,7 @@ function generatePlanetaryBodyDetails(name, systemData) {
                     } else if (i === 7) {
                         details.size = 'Large'
                         details.radius = 58232
-                        details.moons = 18
+                        details.moonCount = 18
                         details.temperature = 'Hot'
                         details.physics = {
                             periodDays: 0,
@@ -203,7 +222,7 @@ function generatePlanetaryBodyDetails(name, systemData) {
                     } else if (i === 8) {
                         details.size = 'Small'
                         details.radius = 24622
-                        details.moons = 7
+                        details.moonCount = 7
                         details.temperature = 'Cold'
                         details.physics = {
                             periodDays: 0,
@@ -212,7 +231,7 @@ function generatePlanetaryBodyDetails(name, systemData) {
                     } else if (i === 9) {
                         details.size = 'Small'
                         details.radius = 25362
-                        details.moons = 4
+                        details.moonCount = 4
                         details.temperature = 'Cold'
                         details.physics = {
                             periodDays: 0,
@@ -229,12 +248,12 @@ function generatePlanetaryBodyDetails(name, systemData) {
                         details.radius = r.integer(20, 60) * 1000
                         moons = twoD6()
                     }
-                    details.moons = moons < 1 ? 0 : moons
+                    details.moonCount = moons < 1 ? 0 : moons
                     details.rings = 0
                     details.temperature = flip()
                         ? 'Hot'
                         : 'Cold'
-                        details.physics = {
+                    details.physics = {
                         periodDays: 0,
                         gravity: 0
                     }
@@ -286,8 +305,8 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
     if (roll <= 0) {
         planetDetails.size = "Small"
         planetDetails.radius = r.integer(150, 250)
-        planetDetails.moons = 0
-        planetDetails.rings = 0
+        planetDetails.moonCount = 0
+        planetDetails.ringCount = 0
         planetDetails.atmosphere = StellarData.atmospheres[0]
         planetDetails.atmoCode = 0
         planetDetails.hydropgraphics = 'None'
@@ -325,7 +344,7 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
             }
         }
 
-        planetDetails.moons = moons < 1 ? 0 : moons
+        planetDetails.moonCount = moons < 1 ? 0 : moons
         planetDetails.rings = 0
         planetDetails.atmosphere = StellarData.atmospheres[atmo]
         planetDetails.atmoCode = atmo

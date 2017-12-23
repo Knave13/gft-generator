@@ -117,7 +117,10 @@ export default class PlanetListDG extends Component {
         let galaxyRef = this.props.db.collection('galaxies').doc(this.props.match.params.id)
         let planetsRef = this.props.db.collection('planets')
         let planets = []
-        this.setState({galaxyRef: galaxyRef, starSystemRef: starSystemRef})
+        this.setState({
+            galaxyRef: galaxyRef, 
+            starSystemRef: starSystemRef
+        })
         starSystemRef.get()
             .then(s => {
                 this.setState({
@@ -128,10 +131,23 @@ export default class PlanetListDG extends Component {
                     .then(query => {
                         if (query.exists) {
                             let planetData = query.data()
+                            console.log(JSON.stringify(planetData, null, 2))
                             for (let i = 0; i < planetData.planets.maxOrbits; i++) {
                                 planets.push(this.mapPlanetsToDataGrid(planetData.planets.orbitData.orbits[i]))
+                                if (planetData.planets.orbitData.orbits[i].details
+                                    && planetData.planets.orbitData.orbits[i].details.moons
+                                    && planetData.planets.orbitData.orbits[i].details.moons > 0) {
+                                    for (let j = 0; j < planetData.planets.orbitData.orbits[i].details.moons; j++) {
+                                        planets.push(this.mapMoonsToDataGrid(planetData.planets.orbitData.orbits[i].moons[j]))
+                                    }
+                                    //planets.push(this.mapMoopnsToDataGrid)
+                                }
                             }
-                            this.setState({planets: planets, planetCount: planets.length, planetDataLoaded: true})
+                            this.setState({
+                                planets: planets, 
+                                planetCount: planets.length, 
+                                planetDataLoaded: true
+                            })
                         }
                     })
             })
@@ -239,7 +255,13 @@ export default class PlanetListDG extends Component {
                     .then(ref => {
                         for (let i = 0; i < planetData.maxOrbits; i++) {
                             planets.push(this.mapPlanetsToDataGrid(planetData.orbitData.orbits[i]))
-                            //for (let j = 0; j < planetData)
+                            if (planetData.orbitData.orbits[i].details
+                                && planetData.orbitData.orbits[i].details.moonCount
+                                && planetData.orbitData.orbits[i].details.moonCount > 0) {
+                                for (let j = 0; j < planetData.orbitData.orbits[i].details.moonCount; j++) {
+                                    planets.push(this.mapMoonsToDataGrid(planetData.orbitData.orbits[i].moons[j]))
+                                }
+                            }
                         }
                         this.setState({planets: planets, planetCount: planets.length, planetDataLoaded: true})
                     })
@@ -247,11 +269,32 @@ export default class PlanetListDG extends Component {
 
         })
     }
+    mapMoonsToDataGrid(moonData, orbit) {
+        let moon = {
+            name: moonData.name,
+            link: {
+                star: this.state.systemData.id,
+                orbit: orbit,
+                name: moonData.name
+            },
+            orbit: '',
+            zone: '',
+            planetType: 'Moon'
+        }
+        if (moonData.physics) {
+            moon.radius = moonData.physics.radius
+            moon.atmosphere = moonData.atmosphere
+            moon.temperature = moonData.temperature
+            moon.period = moonData.physics.period
+            moon.gravity = moonData.physics.gravity
+            moon.moons = ''
+        }
+
+        return moon
+    }
 
     mapPlanetsToDataGrid(planetData) {
-        console.log(JSON.stringify(planetData, null, 2))
         let planet = {
-            id: planetData.id,
             name: planetData.name,
             link: {
                 star: this.state.systemData.id,
@@ -268,7 +311,7 @@ export default class PlanetListDG extends Component {
             planet.temperature = planetData.details.temperature
             planet.period = planetData.details.physics.period
             planet.gravity = planetData.details.physics.gravity
-            planet.moons = planetData.details.moons
+            planet.moons = planetData.details.moonCount
         }
 
         return planet
