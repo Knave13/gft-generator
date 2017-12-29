@@ -105,7 +105,6 @@ var generator = {
     },
     generateMoons: function (planetData, optionData, callback) {
         let stellarData = planetData.stellarData
-        let parentStar = planetData.parentStar
         for (let i = 0; i < planetData.maxOrbits; i++) {
             let planet = planetData.orbitData.orbits[i]
             let moonChar = 'a'
@@ -169,17 +168,17 @@ var generator = {
                     let hydro = twoD6() - 7 + sizeModifier + hydroModifier
                     if (size < 1) {
                         hydro = 0
-                    } else if (size == 1 || size >= 10) {
+                    } else if (size === 1 || size >= 10) {
                         hydro += -4
                     }
                     if (hydro < 0) {
                         hydro = 0
                     }
                     moonData.hydroPercentage = hydro * 10
-                    moonData.hydrographics = hydro == 0 ? 'None' : moonData.hydroPercentage + '%'
+                    moonData.hydrographics = hydro === 0 ? 'None' : moonData.hydroPercentage + '%'
                     moonData.density = 1.0 + r.integer(-20, 20) / 100
 
-                    moonData.physics = calculatePlanetaryDetails(moonData.radius, i, moonData.density, stellarData.mass, 0)
+                    moonData.physics = calculateMoonDetails(moonData.radius, i, moonData.density, stellarData.mass, 0)
                     moonData.albedoData = calculateAlbedo(i, stellarData.luminosity, moonData)
                     moonData.temperature = calculateTemperature(i, stellarData.luminosity, moonData.albedoData.greenhouse, moonData.albedoData.albedo)
                 
@@ -741,8 +740,8 @@ function getMaximumOrbits(starType, starSize) {
     } else if (starType === StellarData.starType.K) {
         roll += -2
     }
-    if (roll < 0) {
-        roll = 0
+    if (roll <= 0) {
+        roll = 1
     }
 
     return roll
@@ -764,8 +763,6 @@ function getEmptyOrbits(systemData) {
         } else {
             result = 1
         }
-        // console.log('Empty Orbits:', result, 'Remaining Orbits:',
-        // systemData.remainingOrbits)
     }
     if (result > systemData.remainingOrbits) {
         result = systemData.remainingOrbits

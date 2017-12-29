@@ -258,7 +258,6 @@ export default class PlanetListDG extends Component {
         let name = this.state.systemData.name
         GenPlanets.generatePlanetaryBodies(name, this.state.systemData.primaryStar, options, (rawPlanetData) => {
             GenPlanets.generateMoons(rawPlanetData, options, (planetData) => {
-                console.log(JSON.stringify(planetData, null, 2))
                 this.setState({'planetData': planetData})
                 this.props.db.collection('planets')
                     .doc(this.props.match.params.star)
@@ -274,7 +273,15 @@ export default class PlanetListDG extends Component {
                                 }
                             }
                         }
-                        this.setState({planets: planets, planetCount: planets.length, planetDataLoaded: true})
+                        let planetsRef = this.props.db.collection('planets').doc(this.props.match.params.star)
+                        let systemRef = this.props.db.collection('starSystems').doc(this.props.match.params.star)
+                        systemRef.set({planetsRef: planetsRef}, {merge: true})
+
+                        this.setState({
+                            planets: planets, 
+                            planetCount: planets.length, 
+                            planetDataLoaded: true
+                        })
                     })
             })
 

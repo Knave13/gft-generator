@@ -97,6 +97,8 @@ var albedo = {
 
 var stellarRadiusConstant = 6371.0
 var stellarPeriodConstant = 365.24
+var planetaryRadiusConstant = 6371.0
+var planetaryPeriodConstant = 28.0
 var suffixes = ['Greek', 'Latin', 'Numeric', 'Roman']
 var greekSuffixes = [
     "",
@@ -331,6 +333,8 @@ var stellarData = {
     kelvin: -273.15,
     stellarRadiusConstant: stellarRadiusConstant,
     stellarPeriodConstant: stellarPeriodConstant,
+    planetaryRadiusConstant: planetaryRadiusConstant,
+    planetaryPeriodConstant: planetaryPeriodConstant,
     planetaryZone: (zone, callback) => {
         if (!isNaN(zone)) {
             callback(Zone[zone])

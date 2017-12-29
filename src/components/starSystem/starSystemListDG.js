@@ -34,7 +34,8 @@ export default class StarSystemListDG extends Component {
             { key: 'magnitude', name: 'Mag', cellClass: 'cellLeft', width: 100 },
             { key: 'mass', name: 'Mass', cellClass: 'cellLeft', width: 100 },
             { key: 'radii', name: 'Radii', cellClass: 'cellLeft', width: 100 },
-            { key: 'temperature', name: 'Temp', cellClass: 'cellLeft', width: 100 }
+            { key: 'temperature', name: 'Temp', cellClass: 'cellLeft', width: 100 },
+            { key: 'generated', name: 'Gen', cellClass: 'cellLeft', width: 60 }
         ]
     }
 
@@ -50,7 +51,7 @@ export default class StarSystemListDG extends Component {
             //.orderBy('name').get()
             .then(query => {
                 query.forEach(x => {
-                    starSystems.push(this.mapStarToDataGrid(x.id, x.data().star))
+                    starSystems.push(this.mapStarToDataGrid(x.id, x.data()))
                 })
                 this.setState({
                     starSystems: starSystems,
@@ -72,7 +73,7 @@ export default class StarSystemListDG extends Component {
             }
         ]
         const divStyle = {
-            width: '1000px'
+            width: '1060px'
         }
         if (this.state.starSystems === '') {
             return (
@@ -119,10 +120,15 @@ export default class StarSystemListDG extends Component {
         return this.state.sortedRows[i]
     }
 
-    mapStarToDataGrid(id, starSystem) {
+    mapStarToDataGrid(id, starData) {
+        let starSystem = starData.star
         let starKey = starSystem.primaryStar.typeCode + starSystem.primaryStar.classification + " " + starSystem.primaryStar.sizeCode
         let friendlyType = StellarData.starTypeColor[starSystem.primaryStar.typeCode]
         let friendlySize = StellarData.starSizeName[starSystem.primaryStar.sizeCode]
+        let planetsGenerated = false
+        if (starData.planetsRef) {
+            planetsGenerated = true
+        }
         let star = {
             id: id,
             name: starSystem.name,
@@ -137,7 +143,8 @@ export default class StarSystemListDG extends Component {
             magnitude: starSystem.astronomics.magnitude,
             mass: starSystem.astronomics.mass,
             radii: starSystem.astronomics.radii,
-            temperature: starSystem.astronomics.temperature
+            temperature: starSystem.astronomics.temperature,
+            generated: planetsGenerated === false ? '' : 'Yes'
         }
 
         return star

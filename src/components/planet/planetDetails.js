@@ -38,7 +38,7 @@ export default class PlanetDetails extends Component {
                 name: 'Planet List'
             }
         ]
-        if (this.state.planetData == '') {
+        if (this.state.planetData === '') {
             return (
                 <div>
                     <Menu menus={menus} />
@@ -57,8 +57,5 @@ export default class PlanetDetails extends Component {
                 </div>
             )
         }
-    }
-    showPlanetDetails() {
-        
     }
 }
