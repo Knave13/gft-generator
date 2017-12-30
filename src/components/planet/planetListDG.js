@@ -57,7 +57,8 @@ export default class PlanetListDG extends Component {
         planetDataLoaded: false,
         systemData: '',
         planets: [],
-        planetCount: 0
+        planetCount: 0,
+        showMoons: false
     }
     constructor(props) {
         super(props)
@@ -124,44 +125,7 @@ export default class PlanetListDG extends Component {
     componentWillMount() {}
 
     componentDidMount() {
-        let starSystemRef = this.props.db.collection('starSystems').doc(this.props.match.params.star)
-        let galaxyRef = this.props.db.collection('galaxies').doc(this.props.match.params.id)
-        let planetsRef = this.props.db.collection('planets')
-        let planets = []
-        this.setState({
-            galaxyRef: galaxyRef, 
-            starSystemRef: starSystemRef
-        })
-        starSystemRef.get()
-            .then(s => {
-                this.setState({
-                    systemData: s.data().star
-                })
-
-                planetsRef.doc(this.props.match.params.star).get()
-                    .then(query => {
-                        if (query.exists) {
-                            let planetData = query.data()
-                            console.log(JSON.stringify(planetData, null, 2))
-                            for (let i = 0; i < planetData.planets.maxOrbits; i++) {
-                                planets.push(this.mapPlanetsToDataGrid(planetData.planets.orbitData.orbits[i]))
-                                if (planetData.planets.orbitData.orbits[i].details
-                                    && planetData.planets.orbitData.orbits[i].details.moonCount
-                                    && planetData.planets.orbitData.orbits[i].details.moonCount > 0) {
-                                    for (let j = 0; j < planetData.planets.orbitData.orbits[i].details.moonCount; j++) {
-                                        planets.push(this.mapMoonsToDataGrid(planetData.planets.orbitData.orbits[i].moons[j]))
-                                    }
-                                    //planets.push(this.mapMoopnsToDataGrid)
-                                }
-                            }
-                            this.setState({
-                                planets: planets, 
-                                planetCount: planets.length, 
-                                planetDataLoaded: true
-                            })
-                        }
-                    })
-            })
+        this.loadPlanets()
     }
 
     render() {
@@ -190,18 +154,19 @@ export default class PlanetListDG extends Component {
                     <h1>No Planet Data Loaded</h1>
                     <br/> {systemDetails}
                     <button
-                        onClick={this
-                        .generatePlanets
-                        .bind(this)}>Generate Planets</button>
+                        onClick={this.generatePlanets.bind(this)}>Generate Planets</button>
                 </div>
             )
         } else {
+            let toggleMoonText = this.state.showMoons ? 'Hide Moons' : 'Show Moons'
             return (
                 <div style={divStyle}>
                     <Menu menus={menus} />
                     {systemDetails}
                     <br/>
                     <div className='indentDiv4'>
+                        <button
+                            onClick={this.toggleMoons.bind(this)}>{toggleMoonText}</button>
                         <ReactDataGrid
                             columns={this._columns}
                             rowGetter={this.rowGetter}
@@ -250,6 +215,53 @@ export default class PlanetListDG extends Component {
         }
     }
 
+    toggleMoons() {
+            this.setState({showMoons: !this.state.showMoons})
+            this.loadPlanets()
+    }
+
+    loadPlanets() {
+        let starSystemRef = this.props.db.collection('starSystems').doc(this.props.match.params.star)
+        let galaxyRef = this.props.db.collection('galaxies').doc(this.props.match.params.id)
+        let planetsRef = this.props.db.collection('planets')
+        let planets = []
+        this.setState({
+            galaxyRef: galaxyRef, 
+            starSystemRef: starSystemRef
+        })
+        starSystemRef.get()
+            .then(s => {
+                this.setState({
+                    systemData: s.data().star
+                })
+
+                planetsRef.doc(this.props.match.params.star).get()
+                    .then(query => {
+                        if (query.exists) {
+                            let planetData = query.data()
+                            
+                            for (let i = 0; i < planetData.planets.maxOrbits; i++) {
+                                planets.push(this.mapPlanetsToDataGrid(planetData.planets.orbitData.orbits[i]))
+                                if (this.state.showMoons 
+                                    && planetData.planets.orbitData.orbits[i].details
+                                    && planetData.planets.orbitData.orbits[i].details.moonCount
+                                    && planetData.planets.orbitData.orbits[i].details.moonCount > 0) {
+                                    for (let j = 0; j < planetData.planets.orbitData.orbits[i].details.moonCount; j++) {
+                                        planets.push(this.mapMoonsToDataGrid(planetData.planets.orbitData.orbits[i].moons[j]))
+                                    }
+                                    //planets.push(this.mapMoopnsToDataGrid)
+                                }
+                            }
+                            this.setState({
+                                planets: planets, 
+                                planetCount: planets.length, 
+                                planetDataLoaded: true
+                            })
+                        }
+                    })
+            })
+    }
+
     generatePlanets() {
         let options = {
             sol: false
@@ -265,7 +277,8 @@ export default class PlanetListDG extends Component {
                     .then(ref => {
                         for (let i = 0; i < planetData.maxOrbits; i++) {
                             planets.push(this.mapPlanetsToDataGrid(planetData.orbitData.orbits[i]))
-                            if (planetData.orbitData.orbits[i].details
+                            if (this.state.showMoons 
+                                && planetData.orbitData.orbits[i].details
                                 && planetData.orbitData.orbits[i].details.moonCount
                                 && planetData.orbitData.orbits[i].details.moonCount > 0) {
                                 for (let j = 0; j < planetData.orbitData.orbits[i].details.moonCount; j++) {
@@ -287,6 +300,7 @@ export default class PlanetListDG extends Component {
 
         })
     }
+
     mapMoonsToDataGrid(moonData, orbit) {
         let moon = {
             name: moonData.name,
