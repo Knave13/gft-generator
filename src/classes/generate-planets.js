@@ -5,105 +5,103 @@ var r = new Random()
 var options = {}
 
 var generator = {
-    generatePlanetaryBodies: (name, parentStar, optionData, callback) => {
+    generatePlanetaryBodies: (name, parentStar, optionData) => {
         GenConfig.initConfig(optionData)
         options = optionData
-        StellarData.stellarData(parentStar.typeCode, parentStar.classification, parentStar.sizeCode, (stellarData) => {
-            // generate an empty array of orbits, orbit count is random but must be as big
-            // as the fathest near companion star orbit
-            let maxOrbits = getMaximumOrbits(parentStar.typeCode, parentStar.sizeCode)
-            // initialize zones
-            let orbitData = initializeOrbits(stellarData.zones, maxOrbits, parentStar.companions)
-            let systemData = {
-                parentStar: parentStar,
-                stellarData: stellarData,
-                maxOrbits: maxOrbits,
-                orbitData: orbitData
-            }
-            // assign gas giants H or O
-            for (let i = 0; i < systemData.orbitData.gasGiants; i++) {
-                let orbit = pickAvailableOrbit([
-                    'H', 'O'
-                ], systemData)
-                if (options.sol) {
-                    orbit = i + 6
-                }
+        let stellarData = StellarData.stellarData(parentStar.typeCode, parentStar.classification, parentStar.sizeCode)
 
-                if (orbit !== -1) {
-                    systemData.orbitData.orbits[orbit].available = false
-                    systemData.orbitData.availableOrbits-- 
-                    systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.GasGiant
-                }
-            }
-            // assign planetoid belt inside of gas giants then random
-            for (let i = 0; i < systemData.orbitData.asteroidBelts; i++) {
-                let orbit = findAsteroidBeltInsideGasGiant(systemData)
-                if (orbit === -1) {
-                    orbit = pickAvailableOrbit([
-                        'I', 'H', 'O'
-                    ], systemData)
-                }
-                if (options.sol) {
-                    orbit = 5
-                }
-
-                if (orbit !== -1) {
-                    systemData.orbitData.orbits[orbit].available = false
-                    systemData.orbitData.availableOrbits-- 
-                    systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Asteroid
-                }
+        // generate an empty array of orbits, orbit count is random but must be as big
+        // as the fathest near companion star orbit
+        let maxOrbits = getMaximumOrbits(parentStar.typeCode, parentStar.sizeCode)
+        // initialize zones
+        let orbitData = initializeOrbits(stellarData.zones, maxOrbits, parentStar.companions)
+        let systemData = {
+            parentStar: parentStar,
+            stellarData: stellarData,
+            maxOrbits: maxOrbits,
+            orbitData: orbitData
+        }
+        // assign gas giants H or O
+        for (let i = 0; i < systemData.orbitData.gasGiants; i++) {
+            let orbit = pickAvailableOrbit([
+                'H', 'O'
+            ], systemData)
+            if (options.sol) {
+                orbit = i + 6
             }
 
-            // empty orbits
-            for (let i = 0; i < systemData.orbitData.emptyOrbits; i++) {
-                // reduce the probablity of an empty orbit in the habitable zone
-                let zones = ['I', 'O']
-                if (r.flip) {
-                    zones.push('H')
-                }
-                let orbit = pickAvailableOrbit(zones, systemData, true)
-                if (options.sol) {
-                    orbit = 0
-                }
-
-                if (orbit !== -1) {
-                    systemData.orbitData.orbits[orbit].available = false
-                    systemData.orbitData.availableOrbits-- 
-                    systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Empty
-                }
+            if (orbit !== -1) {
+                systemData.orbitData.orbits[orbit].available = false
+                systemData.orbitData.availableOrbits-- 
+                systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.GasGiant
             }
-
-            // assign camptured planets
-            for (let i = 0; i < systemData.orbitData.capturedPlanets; i++) {
-                let orbit = pickAvailableOrbit([
+        }
+        // assign planetoid belt inside of gas giants then random
+        for (let i = 0; i < systemData.orbitData.asteroidBelts; i++) {
+            let orbit = findAsteroidBeltInsideGasGiant(systemData)
+            if (orbit === -1) {
+                orbit = pickAvailableOrbit([
                     'I', 'H', 'O'
                 ], systemData)
-
-                if (orbit !== -1) {
-                    systemData.orbitData.orbits[orbit].available = false
-                    systemData.orbitData.availableOrbits-- 
-                    systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Planet
-                    systemData.orbitData.orbits[orbit].orbitOffset = r.integer(0, 10) - 5
-                }
+            }
+            if (options.sol) {
+                orbit = 5
             }
 
-            // assign planets
-            for (let i = 0; i < systemData.maxOrbits; i++) {
-                if (systemData.orbitData.orbits[i].available) {
-                    systemData.orbitData.orbits[i].available = false
-                    systemData.orbitData.availableOrbits-- 
-                    systemData.orbitData.orbits[i].orbitType = StellarData.orbitType.Planet
-                }
+            if (orbit !== -1) {
+                systemData.orbitData.orbits[orbit].available = false
+                systemData.orbitData.availableOrbits-- 
+                systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Asteroid
+            }
+        }
+
+        // empty orbits
+        for (let i = 0; i < systemData.orbitData.emptyOrbits; i++) {
+            // reduce the probablity of an empty orbit in the habitable zone
+            let zones = ['I', 'O']
+            if (r.flip) {
+                zones.push('H')
+            }
+            let orbit = pickAvailableOrbit(zones, systemData, true)
+            if (options.sol) {
+                orbit = 0
             }
 
-            // this should get called after the gas giants and planetary details are generated
-            // need numbers not text for things like orbits, atmo, moons, rings, etc.
-            systemData = generatePlanetaryBodyDetails(name, systemData)
+            if (orbit !== -1) {
+                systemData.orbitData.orbits[orbit].available = false
+                systemData.orbitData.availableOrbits-- 
+                systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Empty
+            }
+        }
 
-            callback(systemData)
-        })
+        // assign camptured planets
+        for (let i = 0; i < systemData.orbitData.capturedPlanets; i++) {
+            let orbit = pickAvailableOrbit(['I', 'H', 'O'], systemData)
+
+            if (orbit !== -1) {
+                systemData.orbitData.orbits[orbit].available = false
+                systemData.orbitData.availableOrbits-- 
+                systemData.orbitData.orbits[orbit].orbitType = StellarData.orbitType.Planet
+                systemData.orbitData.orbits[orbit].orbitOffset = r.integer(0, 10) - 5
+            }
+        }
+
+        // assign planets
+        for (let i = 0; i < systemData.maxOrbits; i++) {
+            if (systemData.orbitData.orbits[i].available) {
+                systemData.orbitData.orbits[i].available = false
+                systemData.orbitData.availableOrbits-- 
+                systemData.orbitData.orbits[i].orbitType = StellarData.orbitType.Planet
+            }
+        }
+
+        // this should get called after the gas giants and planetary details are generated
+        // need numbers not text for things like orbits, atmo, moons, rings, etc.
+        systemData = generatePlanetaryBodyDetails(name, systemData)
+
+        return systemData
     },
-    generateMoons: function (planetData, optionData, callback) {
+    generateMoons: (planetData, optionData) => {
         let stellarData = planetData.stellarData
         for (let i = 0; i < planetData.maxOrbits; i++) {
             let planet = planetData.orbitData.orbits[i]
@@ -190,7 +188,48 @@ var generator = {
                 }
             }
         }
-        callback(planetData)
+
+        return planetData
+    },
+    generateAsteroidBelt: (orbit, planetData) => {
+        let data = {}
+        let density = r.D6()
+        let metallic = r.D6()
+        // check the inside and outside orbits, if they are gas giants the density increases and the metallic percentage increases as well
+        console.log(JSON.stringify(planetData.orbitData.orbits[orbit], null, 2))
+
+        if (orbit > 0 && planetData.orbitData.orbits[orbit-1].orbitType === 'GasGiant') {
+            density += 2
+            metallic++
+        }
+        if (planetData.orbitData.orbits[orbit+1] && planetData.orbitData.orbits[orbit+1].orbitType === 'GasGiants') {
+            density += 2
+            metallic++
+        }
+        if (density >= 6) {
+            data.density = 'Dense'
+        } else if (density > 2) {
+            data.density = 'Normal'
+        } else {
+            data.density = 'Light'
+        }
+
+        if (metallic >= 6) {
+            data.metals = 20
+            data.volatiles = 60
+            data.carboneceous = 20
+        } else if (metallic > 2) {
+            data.metals = 10
+            data.volatiles = 40
+            data.carbonaceous = 55
+        } else {
+            data.metals = 5
+            data.volatiles = 30
+            data.carbonaceous = 65
+        }
+        data.specials = r.twoD6() > 10 ? 'yes' : 'no'
+
+        return data
     }
 }
 
@@ -218,6 +257,45 @@ function getAvailableSatelliteOrbit(orbitCollection, isGasGiant) {
     }
 
     return orbit
+}
+
+let generateGasGiantDetails = (zoneCode) => {
+    let details = {}
+    let moons = 0
+
+    if (flip()) {
+        details.size = 'Large'
+        details.radius = r.integer(60, 200) * 1000
+        moons = twoD6() + 5
+    } else {
+        details.size = 'Small'
+        details.radius = r.integer(20, 60) * 1000
+        moons = twoD6()
+    }
+    details.moonCount = moons < 1 ? 0 : moons
+    details.ringCount = d6()
+    let roll = d6()
+    if (zoneCode === 'I') {
+        roll += 2
+    } else if (zoneCode === 'H') {
+        roll += 1
+    }
+
+    if (roll > 4) {
+        details.temperature = 'Hot'
+        details.radiation = flip() ? 'High' : 'Medium'
+        details.density = flip() ? 'Low' : 'Medium'
+    } else {
+        details.temperature = 'Cold'
+        details.radiation = flip() ? 'Low' : 'Medium'
+        details.density = flip() ? 'High' : 'Medium'  
+    }
+    details.physics = {
+        periodDays: 0,
+        gravity: 'n/a'
+    }
+
+    return details
 }
 
 function generatePlanetaryBodyDetails(name, systemData) {
@@ -271,24 +349,7 @@ function generatePlanetaryBodyDetails(name, systemData) {
                         }
                     }
                 } else {
-                    if (flip()) {
-                        details.size = 'Large'
-                        details.radius = r.integer(60, 200) * 1000
-                        moons = twoD6() + 5
-                    } else {
-                        details.size = 'Small'
-                        details.radius = r.integer(20, 60) * 1000
-                        moons = twoD6()
-                    }
-                    details.moonCount = moons < 1 ? 0 : moons
-                    details.ringCount = 0
-                    details.temperature = flip()
-                        ? 'Hot'
-                        : 'Cold'
-                    details.physics = {
-                        periodDays: 0,
-                        gravity: 0
-                    }
+                    details = generateGasGiantDetails(systemData.orbitData.orbits[i].orbitZoneCode)
                 }
                 systemData.orbitData.orbits[i].name = name + ' ' + planetCount
                 systemData.orbitData.orbits[i].details = details
@@ -559,11 +620,7 @@ function calculateAlbedo(orbit, luminosity, planetData) {
     var data = {}
     var surface = {}
 
-    data.cloudiness = StellarData.cloudiness[
-        planetData
-            .hydroPercentage
-            .toString()
-    ]
+    data.cloudiness = StellarData.cloudiness[planetData.hydroPercentage.toString()]
     if (planetData.atmoCode === 14) {
         data.cloudiness /= 2
     } else if (planetData.atmoCode >= 10) {
@@ -580,6 +637,7 @@ function calculateAlbedo(orbit, luminosity, planetData) {
     data.cloudMod = 1.0 - data.cloudiness
     data.radiusau = StellarData.radiusau[orbit]
     data.greenhouse = 1.0 + calculateGreenhouse(planetData.atmoCode) / 100.0
+
     surface.land = (100 - planetData.hydroPercentage) / 100.0
     surface.desertMod = surface.land // use the unmodified land percentage to calculate desert
     if (planetData.hydroPercentage > 0) {
@@ -596,17 +654,23 @@ function calculateAlbedo(orbit, luminosity, planetData) {
     surface.desert = (surface.land - surface.mountains) * surface.desertMod
     surface.veldt = surface.land - surface.mountains - surface.desert
     surface.checksum = surface.water + surface.ice + surface.mountains + surface.desert + surface.veldt
-    data.albedo = (data.cloudiness * StellarData.albedo["Clouds"]) + (surface.veldt * data.cloudMod * StellarData.albedo["Veldt"]) + (surface.mountains * data.cloudMod * StellarData.albedo["Mountain"]) + (surface.desert * data.cloudMod * StellarData.albedo["Desert"]) + (surface.ice * data.cloudMod * StellarData.albedo["Clouds"]) + (surface.water * data.cloudMod * StellarData.albedo["Ice"])
-    // console.log((data.cloudiness * StellarData.albedo["Clouds"]),
-    // (surface.veldt * data.cloudMod * StellarData.albedo["Veldt"]),
-    // (surface.mountains * data.cloudMod * StellarData.albedo["Mountain"]),
-    //     (surface.desert * data.cloudMod * StellarData.albedo["Desert"]),
-    //    (surface.ice * data.cloudMod * StellarData.albedo["Clouds"]),
-    // (surface.water * data.cloudMod * StellarData.albedo["Ice"]))
+
+    data.albedo = (data.cloudiness * (StellarData.albedo["Clouds"] + calculateAlbedoVarience(StellarData.albedoVariance["Clouds"])))
+        + (surface.veldt * data.cloudMod * (StellarData.albedo["Veldt"] + calculateAlbedoVarience(StellarData.albedoVariance["Veldt"]))) 
+        + (surface.mountains * data.cloudMod * (StellarData.albedo["Mountain"] + calculateAlbedoVarience(StellarData.albedoVariance["Mountain"]))) 
+        + (surface.desert * data.cloudMod * (StellarData.albedo["Desert"] + calculateAlbedoVarience(StellarData.albedoVariance["Desert"]))) 
+        + (surface.ice * data.cloudMod * (StellarData.albedo["Ice"] + calculateAlbedoVarience(StellarData.albedoVariance["Ice"]))) 
+        + (surface.water * data.cloudMod * (StellarData.albedo["Water"] + calculateAlbedoVarience(StellarData.albedoVariance["Water"])))
 
     data.surface = surface
 
     return data
+}
+
+function calculateAlbedoVarience(variance) {
+    let roll = r.real(-variance, variance)
+
+    return roll
 }
 
 function calculateGreenhouse(atmoCode) {

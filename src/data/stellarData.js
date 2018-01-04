@@ -83,14 +83,25 @@ var greenhouse = [
     0
 ]
 var albedo = {
-    "Veldt": 0.1,
-    "Desert": 0.2,
-    "Water": 0.02,
-    "Ice": 0.85,
-    "Snow": 0.85,
-    "DirtyIce": 0.55,
-    "Mountain": 0.15,
-    "Clouds": 0.4
+    "Veldt": 0.15,
+    "Desert": 0.27,
+    "Water": 0.03,
+    "Ice": 0.80,
+    "Snow": 0.75,
+    "DirtyIce": 0.7,
+    "Mountain": 0.25,
+    "Clouds": 0.6
+}
+
+var albedoVariance = {
+    "Veldt": 0.05,
+    "Desert": 0.03,
+    "Water": 0.015,
+    "Ice": 0.05,
+    "Snow": 0.15,
+    "DirtyIce": 0.1,
+    "Mountain": 0.1,
+    "Clouds": 0.3
 }
 // var axialTilt = [0, 1.7, 1.6, 1.5, 1.3, 1.2, 1.0, 1.24, 1.16, 1.09, 1.0 ] var
 //              0, 17   34    50   66   77   87   93   98   100
@@ -280,10 +291,10 @@ var stellarData = {
     stellarDataByKey: (starKey) => {
         return getStellarDataByKey(starKey)
     },
-    stellarData: (typeCode, classification, sizeCode, callback) => {
+    stellarData: (typeCode, classification, sizeCode) => {
         var key = typeCode + classification + sizeCode
         var data = getStellarDataByKey(key)
-        callback(data)
+        return data
     },
     stellarSize: (size, callback) => {
         callback(StarSize[size])
@@ -330,6 +341,7 @@ var stellarData = {
     cloudiness: cloudiness,
     greenhouse: greenhouse,
     albedo: albedo,
+    albedoVariance: albedoVariance,
     kelvin: -273.15,
     stellarRadiusConstant: stellarRadiusConstant,
     stellarPeriodConstant: stellarPeriodConstant,

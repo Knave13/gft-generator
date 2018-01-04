@@ -178,7 +178,7 @@ export default class PlanetListDG extends Component {
         }
     }
 
-    displaySystemDetails(props) {
+    displaySystemDetails = (props) => {
         if (this.state.systemData === '') {
             return (
                 <div>
@@ -215,12 +215,12 @@ export default class PlanetListDG extends Component {
         }
     }
 
-    toggleMoons() {
+    toggleMoons = () => {
             this.setState({showMoons: !this.state.showMoons})
             this.loadPlanets()
     }
 
-    loadPlanets() {
+    loadPlanets = () => {
         let starSystemRef = this.props.db.collection('starSystems').doc(this.props.match.params.star)
         let galaxyRef = this.props.db.collection('galaxies').doc(this.props.match.params.id)
         let planetsRef = this.props.db.collection('planets')
@@ -262,46 +262,49 @@ export default class PlanetListDG extends Component {
             })
     }
 
-    generatePlanets() {
+    generatePlanets = () => {
         let options = {
             sol: false
         }
         let planets = []
         let name = this.state.systemData.name
-        GenPlanets.generatePlanetaryBodies(name, this.state.systemData.primaryStar, options, (rawPlanetData) => {
-            GenPlanets.generateMoons(rawPlanetData, options, (planetData) => {
-                this.setState({'planetData': planetData})
-                this.props.db.collection('planets')
-                    .doc(this.props.match.params.star)
-                    .set({planets: planetData})
-                    .then(ref => {
-                        for (let i = 0; i < planetData.maxOrbits; i++) {
-                            planets.push(this.mapPlanetsToDataGrid(planetData.orbitData.orbits[i]))
-                            if (this.state.showMoons 
-                                && planetData.orbitData.orbits[i].details
-                                && planetData.orbitData.orbits[i].details.moonCount
-                                && planetData.orbitData.orbits[i].details.moonCount > 0) {
-                                for (let j = 0; j < planetData.orbitData.orbits[i].details.moonCount; j++) {
-                                    planets.push(this.mapMoonsToDataGrid(planetData.orbitData.orbits[i].moons[j]))
-                                }
-                            }
+        let rawPlanetData = GenPlanets.generatePlanetaryBodies(name, this.state.systemData.primaryStar, options)
+        let planetData = GenPlanets.generateMoons(rawPlanetData, options)
+        
+        for (let p = 0; p < planetData.orbitData.orbits.length; p++) {
+            if (planetData.orbitData.orbits[p].orbitType === 'AsteroidBelt') {
+                GenPlanets.generateAsteroidBelt(p, planetData)
+            }
+        }
+
+        this.props.db.collection('planets')
+            .doc(this.props.match.params.star)
+            .set({planets: planetData})
+            .then(ref => {
+                for (let i = 0; i < planetData.maxOrbits; i++) {
+                    planets.push(this.mapPlanetsToDataGrid(planetData.orbitData.orbits[i]))
+                    if (this.state.showMoons 
+                        && planetData.orbitData.orbits[i].details
+                        && planetData.orbitData.orbits[i].details.moonCount
+                        && planetData.orbitData.orbits[i].details.moonCount > 0) {
+                        for (let j = 0; j < planetData.orbitData.orbits[i].details.moonCount; j++) {
+                            planets.push(this.mapMoonsToDataGrid(planetData.orbitData.orbits[i].moons[j]))
                         }
-                        let planetsRef = this.props.db.collection('planets').doc(this.props.match.params.star)
-                        let systemRef = this.props.db.collection('starSystems').doc(this.props.match.params.star)
-                        systemRef.set({planetsRef: planetsRef}, {merge: true})
+                    }
+                }
+                let planetsRef = this.props.db.collection('planets').doc(this.props.match.params.star)
+                let systemRef = this.props.db.collection('starSystems').doc(this.props.match.params.star)
+                systemRef.set({planetsRef: planetsRef}, {merge: true})
 
-                        this.setState({
-                            planets: planets, 
-                            planetCount: planets.length, 
-                            planetDataLoaded: true
-                        })
-                    })
+                this.setState({
+                    planets: planets, 
+                    planetCount: planets.length, 
+                    planetDataLoaded: true
+                })
             })
-
-        })
     }
 
-    mapMoonsToDataGrid(moonData, orbit) {
+    mapMoonsToDataGrid = (moonData, orbit) => {
         let moon = {
             name: moonData.name,
             link: {
@@ -326,7 +329,7 @@ export default class PlanetListDG extends Component {
         return moon
     }
 
-    mapPlanetsToDataGrid(planetData) {
+    mapPlanetsToDataGrid = (planetData) => {
         let planet = {
             name: planetData.name,
             link: {
