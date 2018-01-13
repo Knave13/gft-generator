@@ -83,22 +83,24 @@ var greenhouse = [
     0
 ]
 var albedo = {
-    "Veldt": 0.15,
-    "Desert": 0.27,
-    "Water": 0.03,
-    "Ice": 0.80,
-    "Snow": 0.75,
-    "DirtyIce": 0.7,
+    "Veldt": 0.32,
+    "Desert": 0.43,
+    "Tundra": 0.235,
+    "Water": 0.07,
+    "Ice": 0.62,
+    "Snow": 0.66,
+    "DirtyIce": 0.6,
     "Mountain": 0.25,
     "Clouds": 0.6
 }
 
 var albedoVariance = {
-    "Veldt": 0.05,
-    "Desert": 0.03,
-    "Water": 0.015,
-    "Ice": 0.05,
-    "Snow": 0.15,
+    "Veldt": 0.15,
+    "Desert": 0.07,
+    "Tundra": 0.065,
+    "Water": 0.02,
+    "Ice": 0.08,
+    "Snow": 0.04,
     "DirtyIce": 0.1,
     "Mountain": 0.1,
     "Clouds": 0.3

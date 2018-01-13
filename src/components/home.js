@@ -7,6 +7,10 @@ export default class Home extends Component {
             {
                 url: '/galaxy',
                 name: 'Go Home'
+            },
+            {
+                url: '/galaxy/tests',
+                name: 'Tests'
             }
         ]
         return (

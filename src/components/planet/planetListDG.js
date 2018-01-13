@@ -96,6 +96,11 @@ export default class PlanetListDG extends Component {
                 cellClass: 'cellLeft',
                 width: 150
             }, {
+                key: 'water',
+                name: 'Hydro',
+                cellClass: 'cellLeft',
+                width: 60
+            }, {
                 key: 'temperature',
                 name: 'Temp',
                 cellClass: 'cellRight',
@@ -144,7 +149,7 @@ export default class PlanetListDG extends Component {
             }
         ]
         const divStyle = {
-            width: '1050px'
+            width: '1110px'
         }
         var systemDetails = this.displaySystemDetails()
         if (!this.state.planetDataLoaded) {
@@ -153,8 +158,7 @@ export default class PlanetListDG extends Component {
                     <Menu menus={menus} />
                     <h1>No Planet Data Loaded</h1>
                     <br/> {systemDetails}
-                    <button
-                        onClick={this.generatePlanets.bind(this)}>Generate Planets</button>
+                    <button onClick={this.generatePlanets.bind(this)}>Generate Planets</button>
                 </div>
             )
         } else {
@@ -165,8 +169,8 @@ export default class PlanetListDG extends Component {
                     {systemDetails}
                     <br/>
                     <div className='indentDiv4'>
-                        <button
-                            onClick={this.toggleMoons.bind(this)}>{toggleMoonText}</button>
+                        <button onClick={this.toggleMoons.bind(this)}>{toggleMoonText}</button>
+                        <button onClick={this.resetPlanets.bind(this)}>Reset Planets</button>
                         <ReactDataGrid
                             columns={this._columns}
                             rowGetter={this.rowGetter}
@@ -216,8 +220,17 @@ export default class PlanetListDG extends Component {
     }
 
     toggleMoons = () => {
-            this.setState({showMoons: !this.state.showMoons})
-            this.loadPlanets()
+        this.setState({showMoons: !this.state.showMoons})
+        this.loadPlanets()
+    }
+
+    resetPlanets = () => {
+        this.setState({planetDataLoaded: false})
+        this.props.db.collection('planets')
+            .doc(this.props.match.params.star).delete()
+            
+        let systemRef = this.props.db.collection('starSystems').doc(this.props.match.params.star)
+            systemRef.set({planetsRef: null}, {merge: true})
     }
 
     loadPlanets = () => {
@@ -270,7 +283,7 @@ export default class PlanetListDG extends Component {
         let name = this.state.systemData.name
         let rawPlanetData = GenPlanets.generatePlanetaryBodies(name, this.state.systemData.primaryStar, options)
         let planetData = GenPlanets.generateMoons(rawPlanetData, options)
-        
+
         for (let p = 0; p < planetData.orbitData.orbits.length; p++) {
             if (planetData.orbitData.orbits[p].orbitType === 'AsteroidBelt') {
                 GenPlanets.generateAsteroidBelt(p, planetData)
@@ -320,6 +333,7 @@ export default class PlanetListDG extends Component {
         if (moonData.physics) {
             moon.radius = moonData.physics.radius
             moon.atmosphere = moonData.atmosphere
+            moon.water = moonData.hydrographics
             moon.temperature = moonData.temperature
             moon.period = moonData.physics.period
             moon.gravity = moonData.physics.gravity
@@ -345,6 +359,7 @@ export default class PlanetListDG extends Component {
         if (planetData.details) {
             planet.radius = planetData.details.radius
             planet.atmosphere = planetData.details.atmosphere
+            planet.water = planetData.details.hydrographics
             planet.temperature = planetData.details.temperature
             planet.period = planetData.details.physics.period
             planet.gravity = planetData.details.physics.gravity

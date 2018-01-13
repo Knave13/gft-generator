@@ -1,6 +1,7 @@
 import StellarData from '../data/stellarData'
 import GenConfig from './generator-config'
 import Random from 'random-js'
+
 var r = new Random()
 var options = {}
 
@@ -156,7 +157,7 @@ var generator = {
                         orbitCollection[moonData.orbit] = j
                     }
                     // Atmosphere
-                    let atmo= twoD6() - 7 + (size > 0 ? size : 0) + atmoModifier
+                    let atmo= twoD6() - 7 + sizeModifier + atmoModifier
                     if (size <= 0 || atmo < 0) {
                         atmo = 0
                     }
@@ -169,6 +170,11 @@ var generator = {
                     } else if (size === 1 || size >= 10) {
                         hydro += -4
                     }
+                    if (atmo < 2) {
+                        hydro = 0
+                    } else if (atmo < 4) {
+                        hydro += -4
+                    }
                     if (hydro < 0) {
                         hydro = 0
                     }
@@ -177,7 +183,7 @@ var generator = {
                     moonData.density = 1.0 + r.integer(-20, 20) / 100
 
                     moonData.physics = calculateMoonDetails(moonData.radius, i, moonData.density, stellarData.mass, 0)
-                    moonData.albedoData = calculateAlbedo(i, stellarData.luminosity, moonData)
+                    moonData.albedoData = calculateAlbedo(i, stellarData.luminosity, moonData.atmoCode, moonData.hydroPercentage)
                     moonData.temperature = calculateTemperature(i, stellarData.luminosity, moonData.albedoData.greenhouse, moonData.albedoData.albedo)
                 
                     moonCollection.push(moonData)
@@ -230,6 +236,9 @@ var generator = {
         data.specials = r.twoD6() > 10 ? 'yes' : 'no'
 
         return data
+    },
+    calculateTemperature: (orbit, luminosity, greenhouse, albedo) => {
+        return calculateTemperature(orbit, luminosity, greenhouse, albedo)
     }
 }
 
@@ -485,7 +494,7 @@ function generatePlanetDetails(orbit, zoneCode, starData, stellarData) {
         }
     }
     planetDetails.physics = calculatePlanetaryDetails(planetDetails.radius, orbit, density, stellarData.mass, 0)
-    planetDetails.albedoData = calculateAlbedo(orbit, stellarData.luminosity, planetDetails)
+    planetDetails.albedoData = calculateAlbedo(orbit, stellarData.luminosity, planetDetails.atmoCode, planetDetails.hydroPercentage)
     planetDetails.temperature = calculateTemperature(orbit, stellarData.luminosity, planetDetails.albedoData.greenhouse, planetDetails.albedoData.albedo)
 
     return planetDetails
@@ -610,25 +619,25 @@ function calculateMoonDetails(radius, orbit, density, planetRadius, planetMass, 
 }
 
 function calculateTemperature(orbit, luminosity, greenhouse, albedo) {
-    var kelvin = 374.025
-    var temp = kelvin * greenhouse * (1.0 - albedo) * Math.pow(luminosity, 0.25) / StellarData.radiusau[orbit] + StellarData.kelvin
+    var k = 374.025
+    var temp = k * greenhouse * (1.0 - albedo) * Math.pow(luminosity, 0.25) / StellarData.radiusau[orbit] + StellarData.kelvin
 
     return temp
 }
 
-function calculateAlbedo(orbit, luminosity, planetData) {
-    var data = {}
-    var surface = {}
+function calculateAlbedo(orbit, luminosity, atmo, hydro) {
+    let data = {}
+    let surface = {}
 
-    data.cloudiness = StellarData.cloudiness[planetData.hydroPercentage.toString()]
-    if (planetData.atmoCode === 14) {
+    data.cloudiness = StellarData.cloudiness[hydro.toString()]
+    if (atmo === 14) {
         data.cloudiness /= 2
-    } else if (planetData.atmoCode >= 10) {
+    } else if (atmo >= 10) {
         data.cloudiness += 40
         data.cloudiness = data.cloudiness > 100
             ? 100
             : data.cloudiness
-    } else if (planetData.atmoCode <= 3) {
+    } else if (atmo <= 3) {
         data.cloudiness = data.cloudiness > 20
             ? 20
             : data.cloudiness
@@ -636,12 +645,12 @@ function calculateAlbedo(orbit, luminosity, planetData) {
     data.cloudiness = data.cloudiness / 100
     data.cloudMod = 1.0 - data.cloudiness
     data.radiusau = StellarData.radiusau[orbit]
-    data.greenhouse = 1.0 + calculateGreenhouse(planetData.atmoCode) / 100.0
+    data.greenhouse = calculateGreenhouse(atmo)
 
-    surface.land = (100 - planetData.hydroPercentage) / 100.0
+    surface.land = (100 - hydro) / 100.0
     surface.desertMod = surface.land // use the unmodified land percentage to calculate desert
-    if (planetData.hydroPercentage > 0) {
-        surface.water = planetData.hydroPercentage / 100.0
+    if (hydro > 0) {
+        surface.water = hydro / 100.0
         surface.ice = surface.land * 0.1
     } else {
         surface.water = 0.0
@@ -652,31 +661,35 @@ function calculateAlbedo(orbit, luminosity, planetData) {
     surface.tectonic = r.integer(0, 30) / 100.0 // percentage of the land that is mountanous
     surface.mountains = surface.land * surface.tectonic
     surface.desert = (surface.land - surface.mountains) * surface.desertMod
-    surface.veldt = surface.land - surface.mountains - surface.desert
-    surface.checksum = surface.water + surface.ice + surface.mountains + surface.desert + surface.veldt
+    surface.tundra = (surface.land - surface.mountains - surface.desert) * surface.desertMod
+    surface.veldt = surface.land - surface.mountains - surface.desert - surface.tundra
+    surface.checksum = surface.water + surface.ice + surface.mountains + surface.desert + surface.veldt + surface.tundra
 
-    data.albedo = (data.cloudiness * (StellarData.albedo["Clouds"] + calculateAlbedoVarience(StellarData.albedoVariance["Clouds"])))
-        + (surface.veldt * data.cloudMod * (StellarData.albedo["Veldt"] + calculateAlbedoVarience(StellarData.albedoVariance["Veldt"]))) 
-        + (surface.mountains * data.cloudMod * (StellarData.albedo["Mountain"] + calculateAlbedoVarience(StellarData.albedoVariance["Mountain"]))) 
-        + (surface.desert * data.cloudMod * (StellarData.albedo["Desert"] + calculateAlbedoVarience(StellarData.albedoVariance["Desert"]))) 
-        + (surface.ice * data.cloudMod * (StellarData.albedo["Ice"] + calculateAlbedoVarience(StellarData.albedoVariance["Ice"]))) 
-        + (surface.water * data.cloudMod * (StellarData.albedo["Water"] + calculateAlbedoVarience(StellarData.albedoVariance["Water"])))
+    data.albedo = (data.cloudiness * calculateAlbedoVariance('Clouds'))
+                + (surface.veldt * data.cloudMod * calculateAlbedoVariance('Veldt'))
+                + (surface.mountains * data.cloudMod * calculateAlbedoVariance('Mountain'))
+                + (surface.desert * data.cloudMod * calculateAlbedoVariance('Desert'))
+                + (surface.ice * data.cloudMod * calculateAlbedoVariance('Ice'))
+                + (surface.water * data.cloudMod * calculateAlbedoVariance('Water'))
+                + (surface.tundra * data.cloudMod * calculateAlbedoVariance('Tundra'))
 
     data.surface = surface
 
     return data
 }
 
-function calculateAlbedoVarience(variance) {
+function calculateAlbedoVariance(terrain) {
+    let variance = StellarData.albedoVariance[terrain]
     let roll = r.real(-variance, variance)
+    let albedo = StellarData.albedo[terrain] + roll
 
-    return roll
+    return albedo
 }
 
 function calculateGreenhouse(atmoCode) {
     // calculate the greenhouse effect based on the specified atmosphere code Result
-    // is a percentage increase +100%, 1.0 - 1.7 console.log('AtmoCode', atmoCode,
-    // 'greenhouse', StellarData.greenhouse[atmoCode])
+    // is a percentage increase +100%, 1.0 - 1.7 
+    //
     var greenhouse = StellarData.greenhouse[atmoCode]
     if (atmoCode === 10) {
         greenhouse += r.integer(10, 60)
