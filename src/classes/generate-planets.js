@@ -660,7 +660,7 @@ function calculateAlbedo(orbit, luminosity, atmo, hydro) {
     surface.water -= surface.ice / 2.0
     surface.tectonic = r.integer(0, 30) / 100.0 // percentage of the land that is mountanous
     surface.mountains = surface.land * surface.tectonic
-    surface.desert = (surface.land - surface.mountains) * surface.desertMod
+    surface.desert = (surface.land - surface.mountains) * surface.desertMod // TODO: may need to rethink desert percentage as a function of water and mountain
     surface.tundra = (surface.land - surface.mountains - surface.desert) * surface.desertMod
     surface.veldt = surface.land - surface.mountains - surface.desert - surface.tundra
     surface.checksum = surface.water + surface.ice + surface.mountains + surface.desert + surface.veldt + surface.tundra

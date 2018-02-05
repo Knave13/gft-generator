@@ -83,30 +83,42 @@ var greenhouse = [
     0
 ]
 var albedo = {
-    "Veldt": 0.32,
-    "Desert": 0.43,
-    "Tundra": 0.235,
-    "Water": 0.07,
-    "Ice": 0.62,
-    "Snow": 0.66,
-    "DirtyIce": 0.6,
-    "Mountain": 0.25,
-    "Clouds": 0.6
+    "Veldt": 0.12,
+    "Desert": 0.22,
+    "Tundra": 0.28,
+    "Water": 0.04,
+    "Ice": 0.77,
+    "Snow": 0.55,
+    "DirtyIce": 0.45,
+    "Mountain": 0.18,
+    "Clouds": 0.42
 }
 
 var albedoVariance = {
-    "Veldt": 0.15,
-    "Desert": 0.07,
-    "Tundra": 0.065,
-    "Water": 0.02,
-    "Ice": 0.08,
-    "Snow": 0.04,
-    "DirtyIce": 0.1,
-    "Mountain": 0.1,
-    "Clouds": 0.3
+    "Veldt": 0.03,
+    "Desert": 0.05,
+    "Tundra": 0.07,
+    "Water": 0.01,
+    "Ice": 0.09,
+    "Snow": 0.12,
+    "DirtyIce": 0.11,
+    "Mountain": 0.5,
+    "Clouds": 0.11
 }
 // var axialTilt = [0, 1.7, 1.6, 1.5, 1.3, 1.2, 1.0, 1.24, 1.16, 1.09, 1.0 ] var
 //              0, 17   34    50   66   77   87   93   98   100
+var earthTerrain = {
+    "Veldt": 0.085,
+    "Desert": 0.035,
+    "Tundra": 0.035,
+    "Water": 0.71,
+    "Ice": 0.05,
+    "Snow": 0.01,
+    "DirtyIce": 0.01,
+    "Mountain": 0.065,
+    "Clouds": 0.60   
+}
+
 
 var stellarRadiusConstant = 6371.0
 var stellarPeriodConstant = 365.24

@@ -66,11 +66,13 @@
     /* text-align: Right; */
 }
 .cellCenter {
-    text-align: Center;
+    /* text-align: center; */
 }
-
-.react-grid-Cell:focus {
-    /* outline: none !important; */
-    /* outline-offset: 0px; */
-    /* background-color: rgba(200,0,0,.5); */
+.labelLeft {
+    text-align: left;
+    display: inline-block;
 }
+/* .react-grid-Cell {
+    padding-left: 8px !important;
+    padding-right: 0px !important;
+} */

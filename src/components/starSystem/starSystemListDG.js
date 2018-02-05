@@ -27,15 +27,15 @@ export default class StarSystemListDG extends Component {
         super(props)
         this._columns = [
             { key: 'link', name: 'Name', sortable: true, formatter: LinkFormatter, cellClass: 'cellLeft', width: 150 },
-            { key: 'starCode', name: 'Code', sortable: true, cellClass: 'cellLeft', width: 80 },
-            { key: 'starType', name: 'Type', sortable: true, cellClass: 'cellLeft', width: 100 },
-            { key: 'starSize', name: 'Size', sortable: true, cellClass: 'cellLeft', width: 150 },
-            { key: 'luminosity', name: 'Lum', cellClass: 'cellLeft', width: 100 },
-            { key: 'magnitude', name: 'Mag', cellClass: 'cellLeft', width: 100 },
-            { key: 'mass', name: 'Mass', cellClass: 'cellLeft', width: 100 },
-            { key: 'radii', name: 'Radii', cellClass: 'cellLeft', width: 100 },
-            { key: 'temperature', name: 'Temp', cellClass: 'cellLeft', width: 100 },
-            { key: 'generated', name: 'Gen', cellClass: 'cellLeft', width: 60 }
+            { key: 'starCode', name: 'Code', sortable: true, width: 80 },
+            { key: 'starType', name: 'Type', sortable: true, width: 100 },
+            { key: 'starSize', name: 'Size', sortable: true, width: 150 },
+            { key: 'luminosity', name: 'Lum', width: 100 },
+            { key: 'magnitude', name: 'Mag', width: 100 },
+            { key: 'mass', name: 'Mass', width: 100 },
+            { key: 'radii', name: 'Radii', width: 100 },
+            { key: 'temperature', name: 'Temp', width: 100 },
+            { key: 'generated', name: 'Gen', width: 60 }
         ]
     }
 
