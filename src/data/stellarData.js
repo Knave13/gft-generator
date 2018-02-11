@@ -86,11 +86,12 @@ var albedo = {
     "Veldt": 0.12,
     "Desert": 0.22,
     "Tundra": 0.28,
-    "Water": 0.04,
-    "Ice": 0.77,
+    "SeaIce": 0.77,
+    "IceShelf": 0.77,
     "Snow": 0.55,
     "DirtyIce": 0.45,
     "Mountain": 0.18,
+    "Water": 0.04,
     "Clouds": 0.42
 }
 
@@ -98,11 +99,12 @@ var albedoVariance = {
     "Veldt": 0.03,
     "Desert": 0.05,
     "Tundra": 0.07,
-    "Water": 0.01,
-    "Ice": 0.09,
+    "SeaIce": 0.09,
+    "IceShelf": 0.09,
     "Snow": 0.12,
     "DirtyIce": 0.11,
     "Mountain": 0.5,
+    "Water": 0.01,
     "Clouds": 0.11
 }
 // var axialTilt = [0, 1.7, 1.6, 1.5, 1.3, 1.2, 1.0, 1.24, 1.16, 1.09, 1.0 ] var
@@ -111,11 +113,12 @@ var earthTerrain = {
     "Veldt": 0.085,
     "Desert": 0.035,
     "Tundra": 0.035,
-    "Water": 0.71,
-    "Ice": 0.05,
+    "SeaIce": 0.05,
+    "IceShelf": 0.05,
     "Snow": 0.01,
     "DirtyIce": 0.01,
     "Mountain": 0.065,
+    "Water": 0.71,
     "Clouds": 0.60   
 }
 

@@ -39,7 +39,7 @@ class FloatingPointFormatter extends Component {
             } else if (value < 1) {
                 precision = 3
             }
-            output = Number(value).toPrecision(precision)
+            output = this.formatDecimal(value, precision)
         } 
         const cellStyle = {
             textAlign: 'center'
@@ -49,6 +49,10 @@ class FloatingPointFormatter extends Component {
                 {output}
             </div>
         )
+    }
+
+    formatDecimal(value, precision) {
+        return Number(value).toPrecision(precision);
     }
 }
 

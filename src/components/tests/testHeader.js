@@ -19,6 +19,10 @@ export default class TestHeader extends Component {
             {
                 url: '/galaxy/tests/albedo',
                 name: 'Albedo'
+            },
+            {
+                url: '/galaxy/tests/terrain',
+                name: 'Terrain'
             }
         ]
         return (
