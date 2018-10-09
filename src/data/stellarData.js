@@ -55,12 +55,12 @@ var cloudiness = {
     "0": 0,
     "10": 0,
     "20": 10,
-    "30": 10,
-    "40": 20,
-    "50": 30,
-    "60": 40,
-    "70": 50,
-    "80": 60,
+    "30": 20,
+    "40": 30,
+    "50": 40,
+    "60": 50,
+    "70": 60,
+    "80": 70,
     "90": 70,
     "100": 70
 }
@@ -86,7 +86,7 @@ var albedo = {
     "Veldt": 0.12,
     "Desert": 0.22,
     "Tundra": 0.28,
-    "SeaIce": 0.77,
+    "IceCap": 0.77,
     "IceShelf": 0.77,
     "Snow": 0.55,
     "DirtyIce": 0.45,
@@ -99,7 +99,7 @@ var albedoVariance = {
     "Veldt": 0.03,
     "Desert": 0.05,
     "Tundra": 0.07,
-    "SeaIce": 0.09,
+    "IceCap": 0.09,
     "IceShelf": 0.09,
     "Snow": 0.12,
     "DirtyIce": 0.11,
@@ -271,6 +271,18 @@ var StarTypeColor = Object.freeze({
     "M": "Red"
 })
 
+var AsteroidType = Object.freeze({
+    "C": "Cabonaceous",
+    "S": "Silicaceous",
+    "M": "Metallic",
+    "A": "Olivine Rich",
+    "D": "",
+    "E": "enstatite achondrite",
+    "P": "",
+    "Q": "",
+    "R": ""
+})
+
 var StarOrbitType = Object.freeze({"Primary": "Primary", "Close": "Close", "Near": "Near", "Far": "Far", "Extended": "Extended"})
 
 var Zone = Object.freeze({"Unavailable": 0, "Inner": 1, "Habitable": 2, "Outer": 3})
@@ -364,6 +376,7 @@ var stellarData = {
     stellarPeriodConstant: stellarPeriodConstant,
     planetaryRadiusConstant: planetaryRadiusConstant,
     planetaryPeriodConstant: planetaryPeriodConstant,
+    earthTerrain: earthTerrain,
     planetaryZone: (zone, callback) => {
         if (!isNaN(zone)) {
             callback(Zone[zone])

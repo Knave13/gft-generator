@@ -147,7 +147,7 @@ var generator = {
                         moonData.size = 'Ring'
                         moonData.radius = r.integer(150, 250)
                         planetData.orbitData.orbits[i].ringCount++
-                        moonData.orbit = planetData.orbitData.orbits[i].ringCount
+                        moonData.orbit = getAvailableRingOrbit(orbitCollection, isGasGiant)
                         orbitCollection[moonData.orbit] = j
                     } else {
                         moonData.size = size * 1600 + r.integer(-10, 10) * 80
@@ -165,7 +165,7 @@ var generator = {
                     moonData.atmoCode = atmo
                     // Hydrographics
                     let hydro = twoD6() - 7 + sizeModifier + hydroModifier
-                    if (size < 1) {
+                    if (size < 1 || atmo < 3) {
                         hydro = 0
                     } else if (size === 1 || size >= 10) {
                         hydro += -4
@@ -190,7 +190,8 @@ var generator = {
                     moonChar = nextChar(moonChar)
                 }
                 if (moonCollection.length > 0) {
-                    planetData.orbitData.orbits[i].moons = moonCollection
+                    planetData.orbitData.orbits[i].moons = moonCollection.sort((a,b) => {
+                        return (Number(a.orbit) > Number(b.orbit)) ? 1 : (Number(b.orbit) > Number(a.orbit)) ? -1 : 0})
                 }
             }
         }
@@ -268,6 +269,30 @@ function getAvailableSatelliteOrbit(orbitCollection, isGasGiant) {
     return orbit
 }
 
+function getAvailableRingOrbit(orbitCollection, isGasGiant) {
+     let valid = false
+     let orbit = ''
+
+     while (!valid) {
+         let distanceRoll = twoD6()
+         let orbitRoll = twoD6()
+
+         if (distanceRoll < 8) {
+             orbit = d6()
+         } else if (distanceRoll < 12) {
+             orbit = (orbitRoll * 3) + ''
+         } else {
+             orbit = (orbitRoll * 5 + 6) + ''
+         }
+         if (!orbitCollection[orbit]) {
+             valid = true
+         }
+     }
+
+     return orbit
+}
+
+
 let generateGasGiantDetails = (zoneCode) => {
     let details = {}
     let moons = 0
@@ -314,7 +339,7 @@ function generatePlanetaryBodyDetails(name, systemData) {
     for (let i = 0; i < systemData.orbitData.orbits.length; i++) {
         let orbit = systemData.orbitData.orbits[i]
         let details = {}
-        let moons = 0
+        //let moons = 0
 
         switch (orbit.orbitType) {
             case StellarData.orbitType.GasGiant:
@@ -669,7 +694,7 @@ function calculateAlbedo(orbit, luminosity, atmo, hydro) {
                 + (surface.veldt * data.cloudMod * calculateAlbedoVariance('Veldt'))
                 + (surface.mountains * data.cloudMod * calculateAlbedoVariance('Mountain'))
                 + (surface.desert * data.cloudMod * calculateAlbedoVariance('Desert'))
-                + (surface.ice * data.cloudMod * calculateAlbedoVariance('Ice'))
+                + (surface.ice * data.cloudMod * calculateAlbedoVariance('IceCap'))
                 + (surface.water * data.cloudMod * calculateAlbedoVariance('Water'))
                 + (surface.tundra * data.cloudMod * calculateAlbedoVariance('Tundra'))
 

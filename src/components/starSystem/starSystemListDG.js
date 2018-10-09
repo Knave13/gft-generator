@@ -56,7 +56,8 @@ export default class StarSystemListDG extends Component {
                 this.setState({
                     starSystems: starSystems,
                     sortedRows: starSystems.slice(0),
-                    starCount: query.size
+                    starCount: query.size,
+                    updater: this.updater
                 })
             })
     }
@@ -149,7 +150,7 @@ export default class StarSystemListDG extends Component {
 
         return star
     }
-
+    
     generateStarSystem() {
         NameGen.generateName((name) => {
             let options = {

@@ -52,7 +52,7 @@ class FloatingPointFormatter extends Component {
     }
 
     formatDecimal(value, precision) {
-        return Number(value).toPrecision(precision);
+        return Number(value).toFixed(precision);
     }
 }
 

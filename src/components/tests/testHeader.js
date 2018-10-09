@@ -1,8 +1,4 @@
 import React, {Component} from 'react'
-import {Redirect} from 'react-router-dom'
-import ReactDataGrid from 'react-data-grid'
-import GenPlanets from '../../classes/generate-planets'
-import StellarData from '../../data/stellarData'
 import Menu from '../menu'
 
 export default class TestHeader extends Component {
@@ -15,6 +11,10 @@ export default class TestHeader extends Component {
             {
                 url: '/galaxy/tests/temperature',
                 name: 'Temperature'
+            },
+            {
+                url: '/galaxy/tests/stellar',
+                name: 'Stellar'
             },
             {
                 url: '/galaxy/tests/albedo',

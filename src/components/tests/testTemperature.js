@@ -1,50 +1,34 @@
 import React, {Component} from 'react'
-import ReactDataGrid from 'react-data-grid'
-import GenPlanets from '../../classes/generate-planets'
 import StellarData from '../../data/stellarData'
-import Astronomics from '../../data/fileAstronomics'
+import Terrain from './components/terrain'
+import Albedo from './components/albedo'
 import Menu from '../menu'
 
 export default class TestTemperature extends Component {
     state = {
         dataLoaded: false,
-        dataCount: 0,
-        temperatureData: []
-    }
-    constructor(props) {
-        super(props)
-        this._columns = [          
-            {
-                key: 'starType',
-                name: 'Type',
-                cellClass: 'cellCenter',
-                width: 60
-            }, {
-                key: 'starSize',
-                name: 'Size',
-                cellClass: 'cellCenter',
-                width: 60
-            }, {
-                key: 'distance',
-                name: 'Dist',
-                cellClass: 'cellCenter',
-                width: 80
-            }, {
-                key: 'targetAlbedo',
-                name: 'albedo',
-                cellClass: 'cellCenter',
-                width: 120
-            }, {
-                key: 'targetTemp',
-                name: 'Temp',
-                cellClass: 'cellCenter',
-                width: 80
-            }
-        ]
+        hydrographics: 70,
+        tectonics: 30,
+        temperature: 0.0,
+        terrain: {
+            water: { name: 'Oceans', value: 0, precision: 3, isTerrain: true, albedo: StellarData.albedo.Water },
+            iceCap: { name: 'Ice Cap', value: 0, precision: 3, isTerrain: true, albedo: StellarData.albedo.IceCap },
+            dirtyIce: { name: 'Dirty Ice', value: 0, precision: 3, isTerrain: true, albedo: StellarData.albedo.DirtyIce },
+            iceShelf: { name: 'Ice Shelf', value: 0, precision: 3, isTerrain: true, albedo: StellarData.albedo.IceShelf },
+            tundra: { name: 'Tundra', value: 0, precision: 3, isTerrain: true, albedo: StellarData.albedo.Tundra },
+            mountain: { name: 'Mountain', value: 0, precision: 3, isTerrain: true, albedo: StellarData.albedo.Mountain },
+            snow: { name: 'Snow', value: 0, precision: 3, isTerrain: true, albedo: StellarData.albedo.Snow },
+            desert: { name: 'Desert', value: 0, precision: 3, isTerrain: true, albedo: StellarData.albedo.Desert },
+            veldt: { name: 'Veldt', value: 0, precision: 3, isTerrain: true, albedo: StellarData.albedo.Veldt },
+            clouds: { name: 'Clouds', value: 0 / 100 + .20, precision: 3, isTerrain: false, albedo: StellarData.albedo.Couds },
+            checksum: { name: 'Checksum', value: 0, precision: 0, isTerrain: false, albedo: 0.0 },
+            hydro: { name: 'Water', value: 0, precision: 0, isTerrain: false, albedo: 0.0 },
+            land: { name: 'Land', value: 0, precision: 0, isTerrain: false, albedo: 0.0 }
+        }
     }
 
     componentDidMount() {
-        this.loadTemperatureData()
+        this.setState({ dataLoaded: true })
     }
 
     render() {
@@ -58,83 +42,121 @@ export default class TestTemperature extends Component {
                 name: 'Tests'
             }
         ]
-        const divStyle = {
-            width: '500px'
+        const divBlockStyle = {
+            display: 'inline-block',
+            textAlign: 'left'
         }
-        if (this.state.dataLoaded === false) {
+        const centerLabel = {
+            display: 'inline-block',
+            textAlign: 'center',
+            minWidth: '50px',
+            fontSize: '18px'
+        }
+        const leftLabel = {
+            display: 'inline-block',
+            textAlign: 'left',
+            minWidth: '150px',
+            fontSize: '18px'
+        }
+
+        if (!this.state.dataLoaded) {
             return (
                 <div>
                     <Menu menus={menus} />
-                    <p>
-                    Loading Temperature data...
-                    </p>
+                    <h2>Terrain Temperature Calculator</h2>
+                    <div>
+                        Loading Temperature Data...
+                    </div>
                 </div>
             )
         } else {
             return (
-                <div style={divStyle}>
+                <div>
                     <Menu menus={menus} />
-                    <br/>
-                    <div className='indentDiv4'>
-                        Atmosphere: Standard (g: 1.10)
+                    <div style={divBlockStyle}>
+                        <label style={leftLabel}>Hydrographics</label> 
+                        <button onClick={this.updateHydrographics.bind(this, 1)}>+</button>
+                        <label style={centerLabel}>{this.state.hydrographics}</label>
+                        <button onClick={this.updateHydrographics.bind(this, -1)}>-</button>
                     </div>
-                    <div className='indentDiv4'>
-                        <ReactDataGrid
-                            columns={this._columns}
-                            rowGetter={this.rowGetter}
-                            rowsCount={this.state.dataCount}
-                            minHeight={500}/>
+                    <br />
+                    <div style={divBlockStyle}>
+                        <label style={leftLabel}>Tectonics</label> 
+                        <button onClick={this.updateTectonics.bind(this, 1)}>+</button>
+                        <label style={centerLabel}>{this.state.tectonics}</label>
+                        <button onClick={this.updateTectonics.bind(this, -1)}>-</button>
                     </div>
-                    <div className='indentDiv4'>
-                        K: 374.025
-                        <br />
-                        T: 288 K (~15 C)
-                    </div>            
+                    <br />
+                    <Terrain 
+                        hydrographics={this.state.hydrographics}
+                        tectonics={this.state.tectonics}
+                        terrain={this.state.terrain}
+                        postResults={this.updateTerrainData.bind(this)} />
+                    <Albedo 
+                        terrain={this.state.terrain}
+                        postResults={this.updateAlbedoData.bind(this)} />
+                    <div>
+                        Temperature: {this.state.temperature}
+                    </div>
                 </div>
             )
         }
     }
 
-    loadTemperatureData() {
-        let typeCount = Object.keys(StellarData.starType).length
-        let sizeCount = Object.keys(StellarData.starSize).length
-        let temperatureData = []
-        for (let i = 0; i < sizeCount; i++) {
-            for (let j = 1; j < typeCount; j++) {
-                for (let k = 0; k < 10; k++) {
-                    let starSize = StellarData.starSize[Object.keys(StellarData.starSize)[i]]
-                    let starType = StellarData.starType[Object.keys(StellarData.starType)[j]]
-
-                    if (starType != 'M' || (starType === 'M' && k < 6)) {
-                        let code = starType + k.toString() + starSize
-                        let name = starType + k.toString()
-                        let astronomics = Astronomics.findByKey(code)
-                        let orbit = astronomics.zones.indexOf('H')
-                        if (orbit != -1) {
-                            let K = 375.025
-                            let G = 1.1
-                            let T = 288.0
-                            let D = StellarData.radiusau[orbit]
-                            let L = astronomics.luminosity
-
-                            let temp = 1.0 - (T * Math.pow(D, 0.5) / K / G / Math.pow(L, 0.25))
-
-                            temperatureData.push({
-                                starType: name,
-                                starSize: starSize,
-                                distance: D,
-                                targetAlbedo: temp,
-                                targetTemp: '288'
-                            })
-                        }
-                    }
-                }
-            }
+    updateHydrographics(increment) {
+        let hydro = this.state.hydrographics
+        hydro += increment
+        if (hydro < 0) {
+            hydro = 0
+        } else if (hydro > 100) {
+            hydro = 100
         }
-        this.setState({ dataLoaded: true, dataCount: temperatureData.length, temperatureData: temperatureData })
+        this.setState( { hydrographics: hydro })
     }
 
-    rowGetter = (i) => {
-        return this.state.temperatureData[i]
+    updateTectonics(increment) {
+        let tect = this.state.tectonics
+        tect += increment
+        if (tect < 0) {
+            tect = 0
+        } else if (tect > 50) {
+            tect = 50
+        }
+        this.setState( { tectonics: tect })
+    }
+
+    updateTerrainData(data) {
+        let temperature = 1.0
+        this.setState({ temperature: temperature })
+    }
+
+    updateAlbedoData(data) {
+        let temperature = 2.0
+        this.setState({ temperature: temperature })
+    }
+
+    updateTemperature() {
+        let albedo = this.calculateAlbedo()
+        let k = 374.025
+        let temp = k * this.state.greenhouse * (1.0 - albedo) * Math.pow(this.state.luminosity, 0.25) / this.state.orbitDistance + StellarData.kelvin
+
+        this.setState({ 
+            temperature: temp,
+            albedo: albedo
+        })
+    }
+
+    calculateAlbedo() {
+        let albedo = 0.0
+    
+        let cloudiness = this.state.terrainData[9].value / 100
+        let cloudMod = 1.0 - cloudiness
+    
+        albedo = cloudiness * this.state.albedoData[9].value
+        for (let i = 0; i < 9; i++) {
+            albedo += this.state.terrainData[i].value / 100 * cloudMod * this.state.albedoData[i].value
+        }
+        
+        return albedo
     }
 }

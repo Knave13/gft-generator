@@ -8,7 +8,7 @@ import Home from './components/home'
 import GalaxyList, {GalaxyDetails} from './components/galaxy/index'
 import PlanetList, {PlanetDetails} from './components/planet/index'
 import StarSystemListDG, {StarSystemDetails} from './components/starSystem/index'
-import TestHeader, {TestTemperature, TestAlbedo, TestTerrain} from './components/tests/index'
+import TestHeader, {TestStellar, TestTemperature, TestAlbedo, TestTerrain} from './components/tests/index'
 
 // Initialize Firebase
 var config = {
@@ -42,6 +42,7 @@ class App extends Component {
                 </header>
                 <Router>
                     <Switch>
+                        <PropsRoute path="/galaxy/tests/stellar" component={TestStellar} db={db} />
                         <PropsRoute path="/galaxy/tests/temperature" component={TestTemperature} db={db} />
                         <PropsRoute path="/galaxy/tests/terrain" component={TestTerrain} db={db} />
                         <PropsRoute path="/galaxy/tests/albedo" component={TestAlbedo} db={db} />

@@ -1,8 +1,5 @@
 import React, {Component} from 'react'
-import ReactDataGrid from 'react-data-grid'
-import GenPlanets from '../../classes/generate-planets'
 import StellarData from '../../data/stellarData'
-import Astronomics from '../../data/fileAstronomics'
 import Menu from '../menu'
 
 export default class TestTemperature extends Component {
@@ -67,7 +64,7 @@ export default class TestTemperature extends Component {
         const lineLabel = {
             display: 'inline-block',
             textAlign: 'left',
-            ['min-width']: '110px',
+            minWidth: '110px',
             fontSize: '18px'
         }
         const outerDivStyle = {

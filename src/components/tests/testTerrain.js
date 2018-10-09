@@ -1,11 +1,8 @@
 import React, {Component} from 'react'
-import ReactDataGrid from 'react-data-grid'
-import GenPlanets from '../../classes/generate-planets'
-import StellarData from '../../data/stellarData'
-import Astronomics from '../../data/fileAstronomics'
 import Menu from '../menu'
+import {Terrain} from './index'
 
-export default class TestTemperature extends Component {
+export default class TestTerrain extends Component {
     state = {
         dataLoaded: false,
         hydrographics: 70,
@@ -54,20 +51,13 @@ export default class TestTemperature extends Component {
         const lineLabel = {
             display: 'inline-block',
             textAlign: 'left',
-            ['min-width']: '150px',
+            minWidth: '150px',
             fontSize: '18px'
-        }
-        const leftLabel = {
-            display: 'inline-block',
-            textAlign: 'left',
-            ['min-width']: '150px',
-            fontSize: '18px',
-            ['padding-left']: '10px'
         }
         const rightLabel = {
             display: 'inline-block',
             textAlign: 'right',
-            ['min-width']: '100px',
+            minWidth: '100px',
             fontSize: '18px'
         }
         if (!this.state.dataLoaded) {
@@ -109,6 +99,8 @@ export default class TestTemperature extends Component {
                             </div>
                         )}
                     </div>
+                    <br />
+                    <Terrain hydrographics={this.state.hydrographics} tectonics={this.state.tectonics} postResults={this.updateTerrainData.bind(this)} />
                 </div>
             )
         }
@@ -116,6 +108,10 @@ export default class TestTemperature extends Component {
 
     formatDecimal(value, precision) {
         return Number(value).toFixed(precision);
+    }
+
+    updateTerrainData(data) {
+        console.log(JSON.stringify(data, null, 2))
     }
 
     updateHydrographics(increment) {
